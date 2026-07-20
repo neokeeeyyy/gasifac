@@ -210,6 +210,11 @@ body {
   font-size: 1rem;
 }
 
+.pricing-grid.single {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
 /* Footer */
 footer {
   padding: 2rem 0;

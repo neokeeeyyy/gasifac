@@ -63,6 +63,13 @@ function setupCheckout() {
   const btn = document.getElementById("checkout-btn");
   if (!btn) return;
 
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("success") === "true") {
+    btn.textContent = "¡Pago exitoso!";
+    btn.disabled = true;
+    return;
+  }
+
   btn.addEventListener("click", async () => {
     const email = prompt("Ingresa tu correo electrónico:");
     if (!email) return;
@@ -87,7 +94,7 @@ function setupCheckout() {
       alert("Error al crear la sesión de pago.");
     } finally {
       btn.disabled = false;
-      btn.textContent = "Suscribirme";
+      btn.textContent = "Suscribirme ahora";
     }
   });
 }
