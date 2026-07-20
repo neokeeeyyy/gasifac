@@ -46,8 +46,14 @@ def parse_pdf(pdf_bytes: bytes, page_start: int = 0, page_end: int | None = None
             for table in tables:
                 if not table or len(table) < 2:
                     continue
-                header = [str(c).strip().lower() if c else "" for c in table[0]]
-                for raw_row in table[1:]:
+                header_idx = 0
+                first_row = [str(c).strip().lower() if c else "" for c in table[0]]
+                if not any(k in " ".join(first_row) for k in ("region", "entidad", "municipio")):
+                    header_idx = 1
+                if header_idx >= len(table):
+                    continue
+                header = [str(c).strip().lower() if c else "" for c in table[header_idx]]
+                for raw_row in table[header_idx + 1:]:
                     if not raw_row or all(c is None for c in raw_row):
                         continue
                     cleaned = [str(c).strip() if c else "" for c in raw_row]
