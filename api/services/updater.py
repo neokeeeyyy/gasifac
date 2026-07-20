@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -17,45 +17,65 @@ async def run_update(db: AsyncSession, pdf_url: str | None = None) -> dict:
             raise ValueError("No se extrajeron filas del PDF")
 
         today = date.today()
-        inserted_municipios = 0
-        inserted_precios = 0
 
+        existing = await db.execute(
+            select(Municipio.estado, Municipio.municipio, Municipio.id)
+        )
+        mun_map = {(r[0], r[1]): r[2] for r in existing.all()}
+
+        new_muns = []
         for row in rows:
-            result = await db.execute(
-                select(Municipio).where(
-                    Municipio.estado == row.estado,
-                    Municipio.municipio == row.municipio,
+            if (row.estado, row.municipio) not in mun_map:
+                new_muns.append(
+                    {
+                        "estado": row.estado,
+                        "municipio": row.municipio,
+                        "region_numero": row.region_numero,
+                    }
                 )
-            )
-            municipio = result.scalar_one_or_none()
-            if not municipio:
-                municipio = Municipio(
-                    estado=row.estado,
-                    municipio=row.municipio,
-                    region_numero=row.region_numero,
-                )
-                db.add(municipio)
-                await db.flush()
-                inserted_municipios += 1
 
+        if new_muns:
+            stmt = (
+                pg_insert(Municipio)
+                .values(new_muns)
+                .on_conflict_do_nothing()
+                .returning(Municipio.id, Municipio.estado, Municipio.municipio)
+            )
+            result = await db.execute(stmt)
+            for r in result.all():
+                mun_map[(r[1], r[2])] = r[0]
+
+            remaining = await db.execute(
+                select(Municipio.estado, Municipio.municipio, Municipio.id)
+            )
+            mun_map = {(r[0], r[1]): r[2] for r in remaining.all()}
+
+        precio_rows = []
+        for row in rows:
+            mun_id = mun_map.get((row.estado, row.municipio))
+            if mun_id:
+                precio_rows.append(
+                    {
+                        "municipio_id": mun_id,
+                        "precio_kg": row.precio_kg,
+                        "precio_litro": row.precio_litro,
+                        "fecha_inicio": today,
+                        "fecha_fin": today,
+                    }
+                )
+
+        if precio_rows:
             stmt = (
                 pg_insert(Precio)
-                .values(
-                    municipio_id=municipio.id,
-                    precio_kg=row.precio_kg,
-                    precio_litro=row.precio_litro,
-                    fecha_inicio=today,
-                    fecha_fin=today,
-                )
+                .values(precio_rows)
                 .on_conflict_do_nothing()
             )
             await db.execute(stmt)
-            inserted_precios += 1
 
         actualizacion = Actualizacion(
             periodo_inicio=today,
             periodo_fin=today,
-            registros_insertados=inserted_precios,
+            registros_insertados=len(precio_rows),
             exitoso=True,
         )
         db.add(actualizacion)
@@ -63,17 +83,10 @@ async def run_update(db: AsyncSession, pdf_url: str | None = None) -> dict:
 
         return {
             "status": "ok",
-            "municipios_insertados": inserted_municipios,
-            "precios_insertados": inserted_precios,
+            "municipios_insertados": len(new_muns),
+            "precios_insertados": len(precio_rows),
         }
 
     except Exception as e:
-        actualizacion = Actualizacion(
-            periodo_inicio=date.today(),
-            periodo_fin=date.today(),
-            exitoso=False,
-            error_msg=str(e),
-        )
-        db.add(actualizacion)
-        await db.commit()
+        await db.rollback()
         return {"status": "error", "detail": str(e)}
