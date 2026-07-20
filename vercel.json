@@ -1,9 +1,8 @@
 {
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
-    { "source": "/gasifac", "destination": "/public/gasifac/index.html" },
-    { "source": "/gasifac/pricing", "destination": "/public/gasifac/pricing.html" },
-    { "source": "/gasifac/widget", "destination": "/public/gasifac/widget/index.html" },
-    { "source": "/gasifac/(.*)", "destination": "/public/gasifac/$1" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.py" },
+    { "src": "/gasifac/pricing", "dest": "/public/gasifac/pricing.html" },
+    { "src": "/gasifac/widget", "dest": "/public/gasifac/widget/index.html" },
+    { "src": "/gasifac/?(.*)", "dest": "/public/gasifac/$1" }
   ]
 }
