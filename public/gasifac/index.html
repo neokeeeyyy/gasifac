@@ -3,76 +3,524 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gasifac — Precios de gas LP en México</title>
+  <title>GASIFAC — Precios de gas LP en México</title>
   <meta name="description" content="Consulta los precios máximos de gas LP por municipio en México. Datos oficiales de la CRE, actualizados semanalmente." />
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-50 font-sans text-slate-800">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    @font-face {
+      font-family: 'Staff X Wide';
+      src: url('fonts/Staff-XWide.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
 
-  <!-- Hero -->
-  <header class="bg-gradient-to-r from-slate-900 to-slate-700 text-white py-16 text-center">
-    <div class="max-w-3xl mx-auto px-6">
-      <div class="inline-flex items-center gap-2 bg-orange-500/20 px-3 py-1 rounded-full text-sm text-orange-300 font-medium mb-6">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/>
-        </svg>
-        Datos oficiales CRE
-      </div>
-      <h1 class="text-4xl font-bold mb-4">Gasifac</h1>
-      <p class="text-lg text-slate-300 mb-8">Precios máximos de gas LP en México — actualizados semanalmente</p>
-      <a href="/gasifac/widget" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-3 rounded-xl transition">Ver Widget</a>
+    :root {
+      --bg: #ffffff;
+      --bg-alt: #f8f9fa;
+      --bg-card: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-sec: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #ea580c;
+      --accent-hover: #c2410c;
+      --accent-glow: rgba(234, 88, 12, 0.08);
+      --font-display: 'Staff X Wide', 'Arial Black', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+    }
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 800;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+      font-family: var(--font-display);
+    }
+    .logo i { font-size: 1.2rem; color: var(--accent); }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-sec);
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: color 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: var(--font-display);
+    }
+    .nav-links a:hover { color: var(--text); }
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .menu-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      margin: 5px 0;
+      transition: 0.3s;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 70px 0 60px;
+      text-align: center;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 300px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(234, 88, 12, 0.15);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+    .hero-title {
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      background: linear-gradient(180deg, var(--text) 0%, var(--text-sec) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-sec);
+      max-width: 580px;
+      margin: 0 auto 32px auto;
+    }
+    .cta-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 50px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 13px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-family: var(--font-display);
+    }
+    .btn-primary {
+      background: var(--text);
+      color: var(--bg);
+      border: 1px solid var(--text);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover {
+      border-color: var(--text);
+      transform: translateY(-2px);
+    }
+
+    /* Mockup placeholder */
+    .mockup {
+      max-width: 680px;
+      margin: 0 auto 0;
+      position: relative;
+      z-index: 1;
+    }
+    .mockup img {
+      width: 100%;
+      filter: drop-shadow(0 20px 40px rgba(0,0,0,0.12));
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 60px 0 50px;
+      position: relative;
+    }
+    .divider-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      width: 100%;
+      position: absolute;
+    }
+    .divider-label {
+      position: relative;
+      background: var(--bg);
+      padding: 0 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-sec);
+      font-family: var(--font-display);
+    }
+
+    /* Stats */
+    .stats { padding-bottom: 20px; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+      border-color: var(--accent);
+    }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 14px;
+      background: var(--accent-glow);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stat-icon i { font-size: 1.2rem; color: var(--accent); }
+    .stat-label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    .stat-value {
+      display: block;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent);
+      font-family: var(--font-display);
+    }
+
+    /* Info cards */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .info-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+    .info-card .info-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+      font-family: var(--font-display);
+    }
+    .info-card .info-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    /* Platforms */
+    .platforms { padding-bottom: 80px; }
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .platform-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .platform-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+    .platform-card i {
+      font-size: 3rem;
+      color: var(--text);
+      margin-bottom: 16px;
+      transition: color 0.3s;
+    }
+    .platform-card:hover i { color: var(--accent); }
+    .platform-card .platform-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      letter-spacing: 0.5px;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      text-align: center;
+    }
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer a:hover { text-decoration: underline; }
+    .footer p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* Animations */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: rgba(255,255,255,0.97);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        padding: 20px 0;
+        text-align: center;
+        gap: 20px;
+      }
+      .nav-links.active { display: flex; }
+      .menu-toggle { display: block; }
+      .cta-row { flex-direction: column; align-items: center; }
+      .cta-row .btn { width: 100%; max-width: 280px; text-align: center; }
+      .platform-grid { grid-template-columns: 1fr; max-width: 300px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="/gasifac" class="logo">
+        <i class="fa-solid fa-fire"></i>
+        <span>GASIFAC</span>
+      </a>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#datos">Datos</a></li>
+        <li><a href="#plataformas">Plataformas</a></li>
+        <li><a href="#comprar">Comprar</a></li>
+      </ul>
     </div>
   </header>
 
-  <!-- Stats -->
-  <section class="py-12">
-    <div class="max-w-3xl mx-auto px-6">
-      <h2 class="text-xl font-bold text-center mb-6">Resumen Nacional</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white border border-slate-200 rounded-xl p-5 text-center">
-          <span class="text-sm text-slate-400 block mb-1">Precio más alto</span>
-          <span class="text-2xl font-bold text-orange-500" id="stat-max">—</span>
+  <main class="container">
+
+    <!-- Hero -->
+    <section class="hero" id="inicio">
+      <div class="mockup">
+        <img src="https://via.placeholder.com/800x420/f8f9fa/111827?text=GASIFAC" alt="GASIFAC Software" />
+      </div>
+      <div class="hero-badge fade-up">
+        <i class="fa-solid fa-bolt"></i>
+        Actualizado semanalmente
+      </div>
+      <h1 class="hero-title fade-up">Consulta los precios máximos de gas LP</h1>
+      <p class="hero-sub fade-up">Datos oficiales de la CRE por municipio, actualizados cada semana.</p>
+      <div class="cta-row fade-up">
+        <a href="#datos" class="btn btn-primary">Ver Precios</a>
+        <a href="#plataformas" class="btn btn-outline">Conocer Más</a>
+      </div>
+    </section>
+
+    <!-- Divider: Datos Actuales -->
+    <div class="divider" id="datos">
+      <div class="divider-line"></div>
+      <h2 class="divider-label">Datos Actuales</h2>
+    </div>
+
+    <!-- Stats -->
+    <section class="stats fade-up">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-arrow-up"></i></div>
+          <span class="stat-label">Precio más alto</span>
+          <span class="stat-value" id="stat-max">—</span>
         </div>
-        <div class="bg-white border border-slate-200 rounded-xl p-5 text-center">
-          <span class="text-sm text-slate-400 block mb-1">Precio más bajo</span>
-          <span class="text-2xl font-bold text-orange-500" id="stat-min">—</span>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-arrow-down"></i></div>
+          <span class="stat-label">Precio más bajo</span>
+          <span class="stat-value" id="stat-min">—</span>
         </div>
-        <div class="bg-white border border-slate-200 rounded-xl p-5 text-center">
-          <span class="text-sm text-slate-400 block mb-1">Promedio</span>
-          <span class="text-2xl font-bold text-orange-500" id="stat-avg">—</span>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <span class="stat-label">Promedio nacional</span>
+          <span class="stat-value" id="stat-avg">—</span>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Search -->
-  <section class="py-12 bg-white border-t border-b border-slate-200">
-    <div class="max-w-3xl mx-auto px-6">
-      <h2 class="text-xl font-bold mb-4">Buscar municipio</h2>
-      <div class="relative mb-4">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <input type="text" id="search-input" placeholder="Ej. Aguascalientes, Ensenada, Benito Juárez..." autocomplete="off"
-          class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-400 transition" />
+    <!-- Info cards -->
+    <section class="fade-up" style="padding: 40px 0 0;">
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-num" id="info-periodo">—</div>
+          <div class="info-desc">Periodo vigente</div>
+        </div>
+        <div class="info-card">
+          <div class="info-num" id="info-municipios">—</div>
+          <div class="info-desc">Municipios</div>
+        </div>
+        <div class="info-card">
+          <div class="info-num" id="info-estados">—</div>
+          <div class="info-desc">Estados</div>
+        </div>
       </div>
-      <div id="search-results" class="space-y-3"></div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Embed -->
-  <section class="py-12">
-    <div class="max-w-3xl mx-auto px-6">
-      <h2 class="text-xl font-bold mb-3">Embebe el widget</h2>
-      <p class="text-sm text-slate-500 mb-3">Copia este código y pégalo en tu sitio web:</p>
-      <code class="block bg-slate-900 text-green-400 px-4 py-3 rounded-xl text-sm overflow-x-auto">&lt;iframe src="https://neokey.dev/gasifac/widget" width="100%" height="600" frameborder="0"&gt;&lt;/iframe&gt;</code>
+    <!-- Divider: Plataformas -->
+    <div class="divider" id="plataformas">
+      <div class="divider-line"></div>
+      <h2 class="divider-label">Plataformas</h2>
     </div>
-  </section>
+
+    <!-- Platforms -->
+    <section class="platforms fade-up">
+      <div class="platform-grid">
+        <div class="platform-card">
+          <i class="fa-brands fa-linux"></i>
+          <span class="platform-name">Linux</span>
+        </div>
+        <div class="platform-card">
+          <i class="fa-brands fa-apple"></i>
+          <span class="platform-name">macOS</span>
+        </div>
+        <div class="platform-card">
+          <i class="fa-brands fa-windows"></i>
+          <span class="platform-name">Windows</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
 
   <!-- Footer -->
-  <footer class="py-6 text-center text-sm text-slate-400 border-t border-slate-200">
-    <p>Datos extraídos de la CRE — <a href="/gasifac/pricing" class="text-orange-500 hover:text-orange-600 font-medium">Planes y precios</a></p>
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 <a href="https://neokey.dev" target="_blank">neokey</a>. Todos los derechos reservados.</p>
+    </div>
   </footer>
 
   <script src="landing.js"></script>

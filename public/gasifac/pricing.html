@@ -3,43 +3,198 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Planes — Gasifac</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Licencia — GASIFAC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    @font-face {
+      font-family: 'Staff X Wide';
+      src: url('fonts/Staff-XWide.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    :root {
+      --bg: #ffffff;
+      --bg-alt: #f8f9fa;
+      --bg-card: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-sec: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #ea580c;
+      --accent-hover: #c2410c;
+      --accent-glow: rgba(234, 88, 12, 0.08);
+      --font-display: 'Staff X Wide', 'Arial Black', sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+    .navbar {
+      position: sticky; top: 0; z-index: 1000;
+      background: rgba(255,255,255,0.85); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); padding: 16px 0;
+    }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 800; font-size: 1.4rem; letter-spacing: 1px;
+      font-family: var(--font-display);
+    }
+    .logo i { font-size: 1.2rem; color: var(--accent); }
+    .back-link {
+      color: var(--text-sec); text-decoration: none; font-size: 0.85rem;
+      font-weight: 600; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    .pricing-section { padding: 60px 0 80px; text-align: center; }
+    .pricing-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent-glow); border: 1px solid rgba(234,88,12,0.15);
+      padding: 6px 16px; border-radius: 999px; font-size: 0.8rem;
+      font-weight: 600; color: var(--accent); margin-bottom: 24px;
+    }
+    .pricing-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+      background: linear-gradient(180deg, var(--text) 0%, var(--text-sec) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .pricing-sub {
+      font-size: 1.1rem; color: var(--text-sec); margin-bottom: 40px;
+    }
+    .plan-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 40px 32px; max-width: 420px;
+      margin: 0 auto; text-align: center;
+      transition: all 0.3s ease;
+    }
+    .plan-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+      border-color: var(--accent);
+    }
+    .plan-name {
+      font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;
+      font-family: var(--font-display);
+    }
+    .plan-price {
+      font-size: 3rem; font-weight: 900; color: var(--accent);
+      font-family: var(--font-display); margin-bottom: 4px;
+    }
+    .plan-price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+    .plan-divider {
+      height: 1px; background: var(--border); margin: 24px 0;
+    }
+    .plan-features { list-style: none; text-align: left; margin-bottom: 28px; }
+    .plan-features li {
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      font-size: 0.95rem; color: var(--text-sec);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .plan-features li:last-child { border-bottom: none; }
+    .plan-features i { color: var(--accent); font-size: 0.85rem; }
+    .btn-buy {
+      display: block; width: 100%; padding: 14px;
+      background: var(--text); color: var(--bg); border: none;
+      border-radius: 8px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.25s;
+      font-family: var(--font-display); text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-buy:hover {
+      transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .btn-buy:disabled {
+      opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
+    }
+
+    .footer {
+      border-top: 1px solid var(--border); padding: 32px 0;
+      text-align: center;
+    }
+    .footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .footer a:hover { text-decoration: underline; }
+    .footer p { color: var(--text-muted); font-size: 0.85rem; }
+  </style>
 </head>
 <body>
-  <header class="hero small">
-    <div class="container">
-      <a href="/gasifac" class="back-link">← Gasifac</a>
-      <h1>Licencia</h1>
+
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="/gasifac" class="logo"><i class="fa-solid fa-fire"></i><span>GASIFAC</span></a>
+      <a href="/gasifac" class="back-link"><i class="fa-solid fa-arrow-left"></i> Volver</a>
     </div>
   </header>
 
-  <main>
-    <section class="pricing">
-      <div class="container">
-        <div class="pricing-grid single">
-          <div class="plan-card featured">
-            <h3>Gasifac</h3>
-            <p class="price">$800 <span>/mes por licencia</span></p>
-            <ul>
-              <li>Procesamiento masivo de CFDIs</li>
-              <li>Un equipo PC por licencia</li>
-              <li>Actualizaciones incluidas</li>
-              <li>Soporte técnico</li>
-            </ul>
-            <button class="btn-primary" id="checkout-btn">Suscribirme ahora</button>
-          </div>
-        </div>
+  <main class="container">
+    <section class="pricing-section">
+      <div class="pricing-badge"><i class="fa-solid fa-shield-halved"></i> Licencia</div>
+      <h1 class="pricing-title">Planes y Precios</h1>
+      <p class="pricing-sub">Una licencia, todas las actualizaciones incluidas.</p>
+
+      <div class="plan-card">
+        <div class="plan-name">GASIFAC</div>
+        <div class="plan-price">$800 <span>/mes</span></div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><i class="fa-solid fa-check"></i> Procesamiento masivo de CFDIs</li>
+          <li><i class="fa-solid fa-check"></i> Un equipo por licencia</li>
+          <li><i class="fa-solid fa-check"></i> Actualizaciones semanales incluidas</li>
+          <li><i class="fa-solid fa-check"></i> Soporte técnico</li>
+          <li><i class="fa-solid fa-check"></i> Datos de la CRE actualizados</li>
+        </ul>
+        <button class="btn-buy" id="checkout-btn">Suscribirme ahora</button>
       </div>
     </section>
   </main>
 
-  <footer>
+  <footer class="footer">
     <div class="container">
-      <p>Pagos procesados por Stripe — <a href="/gasifac">Volver al inicio</a></p>
+      <p>Pagos seguros vía Stripe — &copy; 2026 <a href="https://neokey.dev" target="_blank">neokey</a></p>
     </div>
   </footer>
 
-  <script src="landing.js"></script>
+  <script>
+    const btn = document.getElementById("checkout-btn");
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("success") === "true") {
+      btn.textContent = "¡Pago exitoso!";
+      btn.disabled = true;
+    } else {
+      btn.addEventListener("click", async () => {
+        const email = prompt("Ingresa tu correo electrónico:");
+        if (!email) return;
+        btn.disabled = true;
+        btn.textContent = "Redirigiendo...";
+        try {
+          const res = await fetch("/api/stripe/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email,
+              success_url: window.location.origin + "/gasifac/pricing?success=true",
+              cancel_url: window.location.origin + "/gasifac/pricing",
+            }),
+          });
+          const data = await res.json();
+          if (data.checkout_url) window.location.href = data.checkout_url;
+        } catch {
+          alert("Error al crear la sesión de pago.");
+          btn.disabled = false;
+          btn.textContent = "Suscribirme ahora";
+        }
+      });
+    }
+  </script>
 </body>
 </html>
