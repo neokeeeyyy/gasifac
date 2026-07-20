@@ -2,7 +2,6 @@ const API = "/api/gas/v1";
 
 document.addEventListener("DOMContentLoaded", () => {
   setupMenu();
-  setupScrollAnimations();
   loadStats();
   loadInfo();
 });
@@ -15,21 +14,6 @@ function setupMenu() {
   links.querySelectorAll("a").forEach(a =>
     a.addEventListener("click", () => links.classList.remove("active"))
   );
-}
-
-function setupScrollAnimations() {
-  const observer = new IntersectionObserver(
-    entries => {
-      entries.forEach((e, i) => {
-        if (e.isIntersecting) {
-          setTimeout(() => e.target.classList.add("visible"), i * 100);
-          observer.unobserve(e.target);
-        }
-      });
-    },
-    { threshold: 0.15 }
-  );
-  document.querySelectorAll(".fade-up").forEach(el => observer.observe(el));
 }
 
 async function loadStats() {
