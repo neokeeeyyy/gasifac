@@ -1,6 +1,5 @@
 {
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/index.py" },
-    { "src": "/gasifac/(.*)", "dest": "/public/gasifac/$1" }
+    { "src": "/(.*)", "dest": "/api/index.py" }
   ]
 }

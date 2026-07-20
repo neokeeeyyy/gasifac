@@ -1,5 +1,7 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from api.routers.precios import router as gas_router
 from api.routers.stats import router as stats_router
@@ -23,3 +25,8 @@ app.include_router(stripe_router)
 @app.get("/api/health")
 async def root_health():
     return {"status": "ok", "version": "1.0.0"}
+
+
+_public = os.path.join(os.path.dirname(__file__), "..", "public")
+if os.path.isdir(os.path.join(_public, "gasifac")):
+    app.mount("/gasifac", StaticFiles(directory=os.path.join(_public, "gasifac"), html=True), name="gasifac")
