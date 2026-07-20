@@ -1,7 +1,6 @@
-import math
-from datetime import date
+from datetime import date, datetime
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,6 +34,8 @@ async def _start_new(db: AsyncSession, pdf_url: str | None) -> dict:
     estado = ProcesamientoEstado(
         pdf_url=storage_path,
         pdf_storage_path=storage_path,
+        periodo_inicio=parse_result.periodo_inicio,
+        periodo_fin=parse_result.periodo_fin,
         total_paginas=parse_result.total_pages,
         pagina_actual=min(BATCH_SIZE, parse_result.total_pages),
         status="processing",
@@ -42,18 +43,18 @@ async def _start_new(db: AsyncSession, pdf_url: str | None) -> dict:
     db.add(estado)
     await db.flush()
 
-    inserted = await _insert_rows(db, parse_result.rows)
+    inserted = await _insert_rows(db, parse_result.rows, parse_result.periodo_inicio, parse_result.periodo_fin)
     estado.registros_insertados = inserted
 
     if estado.pagina_actual >= estado.total_paginas:
         estado.status = "done"
-        from datetime import datetime
         estado.completed_at = datetime.utcnow()
         await db.commit()
         return {
             "status": "ok",
             "registros_insertados": estado.registros_insertados,
             "total_paginas": estado.total_paginas,
+            "periodo": f"{parse_result.periodo_inicio} al {parse_result.periodo_fin}",
         }
 
     await db.commit()
@@ -73,19 +74,19 @@ async def _continue_batch(db: AsyncSession, estado: ProcesamientoEstado) -> dict
 
     parse_result = parse_pdf(pdf_bytes, page_start=page_start, page_end=page_end)
 
-    inserted = await _insert_rows(db, parse_result.rows)
+    inserted = await _insert_rows(db, parse_result.rows, estado.periodo_inicio, estado.periodo_fin)
     estado.registros_insertados += inserted
     estado.pagina_actual = page_end
 
     if estado.pagina_actual >= estado.total_paginas:
         estado.status = "done"
-        from datetime import datetime
         estado.completed_at = datetime.utcnow()
         await db.commit()
         return {
             "status": "ok",
             "registros_insertados": estado.registros_insertados,
             "total_paginas": estado.total_paginas,
+            "periodo": f"{estado.periodo_inicio} al {estado.periodo_fin}",
         }
 
     await db.commit()
@@ -97,7 +98,7 @@ async def _continue_batch(db: AsyncSession, estado: ProcesamientoEstado) -> dict
     }
 
 
-async def _insert_rows(db: AsyncSession, rows) -> int:
+async def _insert_rows(db: AsyncSession, rows, periodo_inicio: str, periodo_fin: str) -> int:
     if not rows:
         return 0
 
@@ -118,11 +119,7 @@ async def _insert_rows(db: AsyncSession, rows) -> int:
             )
 
     if new_muns:
-        stmt = (
-            pg_insert(Municipio)
-            .values(new_muns)
-            .on_conflict_do_nothing()
-        )
+        stmt = pg_insert(Municipio).values(new_muns).on_conflict_do_nothing()
         await db.execute(stmt)
 
         existing = await db.execute(
@@ -130,7 +127,6 @@ async def _insert_rows(db: AsyncSession, rows) -> int:
         )
         mun_map = {(r[0], r[1]): r[2] for r in existing.all()}
 
-    today = date.today()
     precio_rows = []
     for row in rows:
         mun_id = mun_map.get((row.estado, row.municipio))
@@ -140,8 +136,8 @@ async def _insert_rows(db: AsyncSession, rows) -> int:
                     "municipio_id": mun_id,
                     "precio_kg": row.precio_kg,
                     "precio_litro": row.precio_litro,
-                    "fecha_inicio": today,
-                    "fecha_fin": today,
+                    "fecha_inicio": periodo_inicio,
+                    "fecha_fin": periodo_fin,
                 }
             )
 

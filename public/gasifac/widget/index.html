@@ -4,24 +4,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Precios Gas LP — Widget</title>
-  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { margin: 0; background: transparent; }
+    #results::-webkit-scrollbar { width: 6px; }
+    #results::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+    #results::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    #results::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
 </head>
 <body>
-  <div class="widget">
-    <div class="widget-header">
-      <h1>Precios Gas LP</h1>
-      <span class="badge" id="periodo">Cargando...</span>
+  <div class="w-full max-w-md mx-auto bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden font-sans">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-slate-900 to-slate-700 px-5 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/>
+            </svg>
+          </div>
+          <h1 class="text-white font-bold text-lg tracking-tight">Gas LP</h1>
+        </div>
+        <span id="periodo" class="text-xs bg-orange-500/20 text-orange-300 px-2.5 py-1 rounded-full font-medium">Cargando...</span>
+      </div>
     </div>
 
-    <div class="search-box">
-      <input type="text" id="search" placeholder="Buscar municipio..." autocomplete="off" />
+    <!-- Search -->
+    <div class="px-5 pt-4 pb-2">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" id="search" placeholder="Buscar municipio..." autocomplete="off"
+          class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-400 transition" />
+      </div>
     </div>
 
-    <div id="results" class="results"></div>
-
-    <div class="widget-footer">
-      <span>Fuente: CRE — neokey.dev/gasifac</span>
+    <!-- Results -->
+    <div id="results" class="max-h-80 overflow-y-auto px-2 pb-2">
+      <div class="px-3 py-8 text-center text-slate-400 text-sm">Escribe al menos 2 caracteres</div>
     </div>
+
+    <!-- Footer -->
+    <div class="px-5 py-3 bg-slate-50 border-t border-slate-100">
+      <div class="flex items-center justify-between text-xs text-slate-400">
+        <span>Fuente: CRE</span>
+        <a href="https://neokey.dev/gasifac" target="_blank" class="text-orange-500 hover:text-orange-600 font-medium transition">neokey.dev/gasifac</a>
+      </div>
+    </div>
+
   </div>
 
   <script src="widget.js"></script>

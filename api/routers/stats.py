@@ -34,6 +34,8 @@ async def processing_status(db: AsyncSession = Depends(get_db)):
         return {"status": "idle"}
     return {
         "status": estado.status,
+        "periodo_inicio": estado.periodo_inicio,
+        "periodo_fin": estado.periodo_fin,
         "pagina_actual": estado.pagina_actual,
         "total_paginas": estado.total_paginas,
         "registros_insertados": estado.registros_insertados,

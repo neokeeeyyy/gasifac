@@ -1,7 +1,15 @@
 import io
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, field
 
 import pdfplumber
+
+
+MESES = {
+    "enero": 1, "febrero": 2, "marzo": 3, "abril": 4,
+    "mayo": 5, "junio": 6, "julio": 7, "agosto": 8,
+    "septiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12,
+}
 
 
 @dataclass
@@ -17,12 +25,21 @@ class PrecioRow:
 class ParseResult:
     rows: list[PrecioRow]
     total_pages: int
+    periodo_inicio: str = ""
+    periodo_fin: str = ""
 
 
 def parse_pdf(pdf_bytes: bytes, page_start: int = 0, page_end: int | None = None) -> ParseResult:
     rows: list[PrecioRow] = []
+    periodo_inicio = ""
+    periodo_fin = ""
+
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
         total_pages = len(pdf.pages)
+
+        first_text = pdf.pages[0].extract_text() or ""
+        periodo_inicio, periodo_fin = _extract_period(first_text)
+
         end = page_end or total_pages
         for page in pdf.pages[page_start:end]:
             tables = page.extract_tables()
@@ -40,7 +57,24 @@ def parse_pdf(pdf_bytes: bytes, page_start: int = 0, page_end: int | None = None
                             rows.append(row)
                     except (ValueError, IndexError):
                         continue
-    return ParseResult(rows=rows, total_pages=total_pages)
+
+    return ParseResult(rows=rows, total_pages=total_pages, periodo_inicio=periodo_inicio, periodo_fin=periodo_fin)
+
+
+def _extract_period(text: str) -> tuple[str, str]:
+    match = re.search(
+        r"DEL\s+(\d{1,2})\s+AL\s+(\d{1,2})\s+DE\s+(\w+)\s+DE\s+(\d{4})",
+        text, re.IGNORECASE,
+    )
+    if not match:
+        return "", ""
+    dia_inicio, dia_fin, mes_str, anio = match.groups()
+    mes = MESES.get(mes_str.lower(), 0)
+    if not mes:
+        return "", ""
+    inicio = f"{anio}-{mes:02d}-{int(dia_inicio):02d}"
+    fin = f"{anio}-{mes:02d}-{int(dia_fin):02d}"
+    return inicio, fin
 
 
 def _map_row(header: list[str], values: list[str]) -> PrecioRow | None:

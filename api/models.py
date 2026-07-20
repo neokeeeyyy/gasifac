@@ -77,6 +77,8 @@ class ProcesamientoEstado(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     pdf_url = Column(String(500), nullable=False)
     pdf_storage_path = Column(String(500))
+    periodo_inicio = Column(String(20))
+    periodo_fin = Column(String(20))
     total_paginas = Column(Integer, default=0)
     pagina_actual = Column(Integer, default=0)
     registros_insertados = Column(Integer, default=0)
