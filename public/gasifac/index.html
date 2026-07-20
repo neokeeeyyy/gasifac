@@ -202,123 +202,6 @@
       font-family: var(--font-display);
     }
 
-    /* Herramientas - Search */
-    .tools-section { padding-bottom: 60px; }
-    .search-bar {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    .search-bar input,
-    .search-bar select {
-      font-family: var(--font-body);
-      font-size: 0.9rem;
-      padding: 10px 16px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      outline: none;
-      background: var(--bg);
-      color: var(--text);
-      transition: border-color 0.2s;
-    }
-    .search-bar input:focus,
-    .search-bar select:focus {
-      border-color: var(--accent);
-    }
-    .search-bar input[type="text"] {
-      flex: 1;
-      min-width: 200px;
-    }
-    .search-bar select { min-width: 180px; }
-
-    .unit-toggle {
-      display: flex;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .unit-toggle button {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 10px 18px;
-      border: none;
-      background: var(--bg);
-      color: var(--text-sec);
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 0.5px;
-    }
-    .unit-toggle button.active {
-      background: var(--text);
-      color: var(--bg);
-    }
-    .unit-toggle button:not(.active):hover {
-      background: var(--bg-alt);
-    }
-
-    /* Results */
-    .results-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      color: var(--text-sec);
-      font-size: 0.85rem;
-    }
-    .results-table {
-      width: 100%;
-      border-collapse: collapse;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .results-table thead {
-      background: var(--bg-alt);
-    }
-    .results-table th {
-      font-family: var(--font-body);
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-sec);
-      padding: 12px 16px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-    .results-table td {
-      font-size: 0.9rem;
-      padding: 12px 16px;
-      border-bottom: 1px solid #f0f0f0;
-      color: var(--text);
-    }
-    .results-table tbody tr:hover {
-      background: var(--bg-alt);
-    }
-    .results-table .price-cell {
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      text-align: right;
-    }
-    .results-table .municipio-cell { font-weight: 600; }
-    .results-table .estado-cell {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-    }
-
-    .results-empty {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-
-    .results-scroll {
-      overflow-x: auto;
-    }
-
     /* Platforms */
     .platforms { padding: 0 0 80px; }
     .platform-grid {
@@ -413,13 +296,6 @@
       .cta-row { flex-direction: column; align-items: center; }
       .cta-row .btn { width: 100%; max-width: 280px; text-align: center; }
       .platform-grid { grid-template-columns: 1fr; max-width: 280px; }
-      .search-bar { flex-direction: column; }
-      .search-bar input[type="text"] { min-width: unset; }
-      .search-bar select { min-width: unset; }
-      .results-table th:nth-child(1),
-      .results-table td:nth-child(1) { min-width: 140px; }
-      .results-table th:nth-child(2),
-      .results-table td:nth-child(2) { min-width: 120px; }
     }
   </style>
 </head>
@@ -437,7 +313,7 @@
       </button>
       <ul class="nav-links" id="navLinks">
         <li><a href="#inicio">Inicio</a></li>
-        <li><a href="#herramientas">Herramientas</a></li>
+        <li><a href="/gasifac/herramientas">Herramientas</a></li>
         <li><a href="#plataformas">Plataformas</a></li>
       </ul>
     </div>
@@ -454,50 +330,8 @@
       <h1 class="hero-title fade-up">Consulta los precios<br>máximos de gas LP</h1>
       <p class="hero-sub fade-up">Datos oficiales de la CRE por municipio, actualizados cada semana.</p>
       <div class="cta-row fade-up">
-        <a href="#herramientas" class="btn btn-primary">Consultar Precios</a>
+        <a href="/gasifac/herramientas" class="btn btn-primary">Consultar Precios</a>
         <a href="#plataformas" class="btn btn-outline">Conocer Más</a>
-      </div>
-    </section>
-
-    <!-- Divider: Herramientas -->
-    <div class="divider" id="herramientas">
-      <div class="divider-line"></div>
-      <h2 class="divider-label">Herramientas</h2>
-    </div>
-
-    <!-- Search & Results -->
-    <section class="tools-section fade-up">
-      <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Buscar municipio o estado..." autocomplete="off" />
-        <select id="estadoFilter">
-          <option value="">Todos los estados</option>
-        </select>
-        <div class="unit-toggle">
-          <button class="active" data-unit="kg">/ kg</button>
-          <button data-unit="lt">/ lt</button>
-        </div>
-      </div>
-
-      <div class="results-header" id="resultsHeader" style="display:none;">
-        <span id="resultsCount"></span>
-      </div>
-
-      <div class="results-scroll">
-        <table class="results-table" id="resultsTable" style="display:none;">
-          <thead>
-            <tr>
-              <th>Municipio</th>
-              <th>Estado</th>
-              <th style="text-align:right;">Precio</th>
-            </tr>
-          </thead>
-          <tbody id="resultsBody"></tbody>
-        </table>
-      </div>
-
-      <div class="results-empty" id="resultsEmpty">
-        <i class="fa-solid fa-magnifying-glass" style="font-size:1.4rem;color:var(--border);display:block;margin-bottom:12px;"></i>
-        Escribe el nombre de un municipio o selecciona un estado para comenzar.
       </div>
     </section>
 
