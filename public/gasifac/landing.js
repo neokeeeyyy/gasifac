@@ -18,6 +18,39 @@ async function loadStats() {
   }
 }
 
+function priceCard(m, precio) {
+  const kg = precio ? `$${Number(precio.precio_kg).toFixed(2)}` : "—";
+  const litro = precio ? `$${Number(precio.precio_litro).toFixed(2)}` : "—";
+  const periodo = precio ? `${formatDate(precio.fecha_inicio)} — ${formatDate(precio.fecha_fin)}` : "";
+  return `
+    <div class="bg-white border border-slate-200 rounded-xl px-5 py-4 mb-3 hover:border-orange-300 hover:shadow-md transition cursor-default">
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <div class="text-base font-bold text-slate-800">${m.municipio}</div>
+          <div class="text-xs text-slate-400">${m.estado}</div>
+        </div>
+        ${periodo ? `<div class="text-[11px] text-slate-400 bg-slate-100 px-2 py-1 rounded-full">${periodo}</div>` : ""}
+      </div>
+      <div class="flex gap-3">
+        <div class="flex-1 bg-orange-50 rounded-lg px-4 py-3 text-center">
+          <div class="text-xs text-orange-600 font-medium mb-1">Precio por Kilo</div>
+          <div class="text-xl font-bold text-orange-600">${kg}</div>
+        </div>
+        <div class="flex-1 bg-blue-50 rounded-lg px-4 py-3 text-center">
+          <div class="text-xs text-blue-600 font-medium mb-1">Precio por Litro</div>
+          <div class="text-xl font-bold text-blue-600">${litro}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-");
+  const meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  return `${parseInt(d)} ${meses[parseInt(m)-1]}`;
+}
+
 function setupSearch() {
   const input = document.getElementById("search-input");
   const results = document.getElementById("search-results");
@@ -32,17 +65,25 @@ function setupSearch() {
       return;
     }
     debounce = setTimeout(async () => {
-      const res = await fetch(`${API}/municipios?q=${encodeURIComponent(q)}&limit=10`);
-      const data = await res.json();
-      results.innerHTML = data
-        .map(
-          (m) =>
-            `<div class="result-item" onclick="selectMunicipio(${m.id})">
-              <strong>${m.municipio}</strong>
-              <div class="estado">${m.estado}</div>
-            </div>`
-        )
-        .join("");
+      results.innerHTML = '<div class="px-4 py-6 text-center text-slate-400 text-sm">Buscando...</div>';
+      try {
+        const res = await fetch(`${API}/municipios?q=${encodeURIComponent(q)}&limit=10`);
+        const data = await res.json();
+        if (data.length === 0) {
+          results.innerHTML = '<div class="px-4 py-8 text-center text-slate-400 text-sm">Sin resultados</div>';
+          return;
+        }
+        const precios = await Promise.all(
+          data.map(m =>
+            fetch(`${API}/precios/${m.id}`)
+              .then(r => r.ok ? r.json() : null)
+              .catch(() => null)
+          )
+        );
+        results.innerHTML = data.map((m, i) => priceCard(m, precios[i])).join("");
+      } catch {
+        results.innerHTML = '<div class="px-4 py-8 text-center text-red-400 text-sm">Error de conexión</div>';
+      }
     }, 300);
   });
 }
@@ -51,12 +92,10 @@ async function selectMunicipio(id) {
   const res = await fetch(`${API}/precios/${id}`);
   const data = await res.json();
   const results = document.getElementById("search-results");
-  results.innerHTML = `
-    <div class="result-item">
-      <strong>${data.municipio_nombre} — $${data.precio_kg}/kg</strong>
-      <div class="estado">${data.estado} · ${data.fecha_inicio} al ${data.fecha_fin}</div>
-    </div>
-  `;
+  results.innerHTML = priceCard(
+    { municipio: data.municipio_nombre, estado: data.estado },
+    data
+  );
 }
 
 function setupCheckout() {

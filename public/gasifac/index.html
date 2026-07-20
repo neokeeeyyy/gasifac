@@ -5,59 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gasifac — Precios de gas LP en México</title>
   <meta name="description" content="Consulta los precios máximos de gas LP por municipio en México. Datos oficiales de la CRE, actualizados semanalmente." />
-  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <header class="hero">
-    <div class="container">
-      <h1>Gasifac</h1>
-      <p class="tagline">Precios máximos de gas LP en México — Datos oficiales CRE</p>
-      <a href="/gasifac/widget" class="cta">Ver Widget</a>
+<body class="bg-slate-50 font-sans text-slate-800">
+
+  <!-- Hero -->
+  <header class="bg-gradient-to-r from-slate-900 to-slate-700 text-white py-16 text-center">
+    <div class="max-w-3xl mx-auto px-6">
+      <div class="inline-flex items-center gap-2 bg-orange-500/20 px-3 py-1 rounded-full text-sm text-orange-300 font-medium mb-6">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/>
+        </svg>
+        Datos oficiales CRE
+      </div>
+      <h1 class="text-4xl font-bold mb-4">Gasifac</h1>
+      <p class="text-lg text-slate-300 mb-8">Precios máximos de gas LP en México — actualizados semanalmente</p>
+      <a href="/gasifac/widget" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8 py-3 rounded-xl transition">Ver Widget</a>
     </div>
   </header>
 
-  <main>
-    <section class="stats" id="stats">
-      <div class="container">
-        <h2>Resumen Nacional</h2>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <span class="stat-label">Precio más alto</span>
-            <span class="stat-value" id="stat-max">—</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Precio más bajo</span>
-            <span class="stat-value" id="stat-min">—</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Promedio</span>
-            <span class="stat-value" id="stat-avg">—</span>
-          </div>
+  <!-- Stats -->
+  <section class="py-12">
+    <div class="max-w-3xl mx-auto px-6">
+      <h2 class="text-xl font-bold text-center mb-6">Resumen Nacional</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5 text-center">
+          <span class="text-sm text-slate-400 block mb-1">Precio más alto</span>
+          <span class="text-2xl font-bold text-orange-500" id="stat-max">—</span>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-5 text-center">
+          <span class="text-sm text-slate-400 block mb-1">Precio más bajo</span>
+          <span class="text-2xl font-bold text-orange-500" id="stat-min">—</span>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-5 text-center">
+          <span class="text-sm text-slate-400 block mb-1">Promedio</span>
+          <span class="text-2xl font-bold text-orange-500" id="stat-avg">—</span>
         </div>
       </div>
-    </section>
-
-    <section class="search-section">
-      <div class="container">
-        <h2>Buscar municipio</h2>
-        <input type="text" id="search-input" placeholder="Ej. Benito Juárez, CDMX..." autocomplete="off" />
-        <div id="search-results" class="results-list"></div>
-      </div>
-    </section>
-
-    <section class="embed-section">
-      <div class="container">
-        <h2>Embebe el widget</h2>
-        <p>Copia este código y pégalo en tu sitio web:</p>
-        <code class="embed-code">&lt;iframe src="https://neokey.dev/gasifac/widget" width="100%" height="600" frameborder="0"&gt;&lt;/iframe&gt;</code>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container">
-      <p>Datos extraídos de la CRE — <a href="/gasifac/pricing">Planes y precios</a></p>
     </div>
+  </section>
+
+  <!-- Search -->
+  <section class="py-12 bg-white border-t border-b border-slate-200">
+    <div class="max-w-3xl mx-auto px-6">
+      <h2 class="text-xl font-bold mb-4">Buscar municipio</h2>
+      <div class="relative mb-4">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="Ej. Aguascalientes, Ensenada, Benito Juárez..." autocomplete="off"
+          class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-400 transition" />
+      </div>
+      <div id="search-results" class="space-y-3"></div>
+    </div>
+  </section>
+
+  <!-- Embed -->
+  <section class="py-12">
+    <div class="max-w-3xl mx-auto px-6">
+      <h2 class="text-xl font-bold mb-3">Embebe el widget</h2>
+      <p class="text-sm text-slate-500 mb-3">Copia este código y pégalo en tu sitio web:</p>
+      <code class="block bg-slate-900 text-green-400 px-4 py-3 rounded-xl text-sm overflow-x-auto">&lt;iframe src="https://neokey.dev/gasifac/widget" width="100%" height="600" frameborder="0"&gt;&lt;/iframe&gt;</code>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-6 text-center text-sm text-slate-400 border-t border-slate-200">
+    <p>Datos extraídos de la CRE — <a href="/gasifac/pricing" class="text-orange-500 hover:text-orange-600 font-medium">Planes y precios</a></p>
   </footer>
 
   <script src="landing.js"></script>
