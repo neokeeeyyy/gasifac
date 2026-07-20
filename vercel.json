@@ -1,8 +1,6 @@
 {
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.py" },
-    { "src": "/gasifac/pricing", "dest": "/public/gasifac/pricing.html" },
-    { "src": "/gasifac/widget", "dest": "/public/gasifac/widget/index.html" },
-    { "src": "/gasifac/?(.*)", "dest": "/public/gasifac/$1" }
+    { "src": "/gasifac/(.*)", "dest": "/public/gasifac/$1" }
   ]
 }
