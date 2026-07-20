@@ -1,17 +1,21 @@
-from pydantic_settings import BaseSettings
+import os
+from functools import lru_cache
 
 
-class Settings(BaseSettings):
-    DATABASE_URL: str
-    SUPABASE_URL: str = ""
-    SUPABASE_ANON_KEY: str = ""
-    SUPABASE_SERVICE_ROLE_KEY: str = ""
-    STRIPE_SECRET_KEY: str = ""
-    STRIPE_WEBHOOK_SECRET: str = ""
-    STRIPE_PRICE_ID: str = ""
-    CRON_SECRET: str = ""
-
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+class Settings:
+    DATABASE_URL: str = os.environ.get("DATABASE_URL", "")
+    SUPABASE_URL: str = os.environ.get("SUPABASE_URL", "")
+    SUPABASE_ANON_KEY: str = os.environ.get("SUPABASE_ANON_KEY", "")
+    SUPABASE_SERVICE_ROLE_KEY: str = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+    STRIPE_SECRET_KEY: str = os.environ.get("STRIPE_SECRET_KEY", "")
+    STRIPE_WEBHOOK_SECRET: str = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+    STRIPE_PRICE_ID: str = os.environ.get("STRIPE_PRICE_ID", "")
+    CRON_SECRET: str = os.environ.get("CRON_SECRET", "")
 
 
-settings = Settings()
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+settings = get_settings()
