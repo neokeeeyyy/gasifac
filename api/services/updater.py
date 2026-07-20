@@ -102,6 +102,12 @@ async def _insert_rows(db: AsyncSession, rows, periodo_inicio: str, periodo_fin:
     if not rows:
         return 0
 
+    from datetime import date as _date
+    fi = _date.fromisoformat(periodo_inicio) if periodo_inicio else None
+    ff = _date.fromisoformat(periodo_fin) if periodo_fin else None
+    if not fi or not ff:
+        raise ValueError(f"Periodo inválido: inicio={periodo_inicio}, fin={periodo_fin}")
+
     existing = await db.execute(
         select(Municipio.estado, Municipio.municipio, Municipio.id)
     )
@@ -109,7 +115,8 @@ async def _insert_rows(db: AsyncSession, rows, periodo_inicio: str, periodo_fin:
 
     new_muns = []
     for row in rows:
-        if (row.estado, row.municipio) not in mun_map:
+        key = (row.estado, row.municipio)
+        if key not in mun_map:
             new_muns.append(
                 {
                     "estado": row.estado,
@@ -128,16 +135,21 @@ async def _insert_rows(db: AsyncSession, rows, periodo_inicio: str, periodo_fin:
         mun_map = {(r[0], r[1]): r[2] for r in existing.all()}
 
     precio_rows = []
+    seen = set()
     for row in rows:
-        mun_id = mun_map.get((row.estado, row.municipio))
+        key = (row.estado, row.municipio)
+        if key in seen:
+            continue
+        seen.add(key)
+        mun_id = mun_map.get(key)
         if mun_id:
             precio_rows.append(
                 {
                     "municipio_id": mun_id,
                     "precio_kg": row.precio_kg,
                     "precio_litro": row.precio_litro,
-                    "fecha_inicio": periodo_inicio,
-                    "fecha_fin": periodo_fin,
+                    "fecha_inicio": fi,
+                    "fecha_fin": ff,
                 }
             )
 
