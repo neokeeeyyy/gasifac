@@ -70,6 +70,21 @@ class Actualizacion(Base):
     error_msg = Column(Text)
 
 
+class ProcesamientoEstado(Base):
+    __tablename__ = "procesamiento_estado"
+    __table_args__ = {"schema": "gas_lp"}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    pdf_url = Column(String(500), nullable=False)
+    pdf_storage_path = Column(String(500))
+    total_paginas = Column(Integer, default=0)
+    pagina_actual = Column(Integer, default=0)
+    registros_insertados = Column(Integer, default=0)
+    status = Column(String(50), default="pending")
+    started_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime)
+
+
 class Usuario(Base):
     __tablename__ = "usuarios"
     __table_args__ = {"schema": "gas_lp"}

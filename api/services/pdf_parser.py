@@ -13,10 +13,18 @@ class PrecioRow:
     precio_litro: float
 
 
-def parse_pdf(pdf_bytes: bytes) -> list[PrecioRow]:
+@dataclass
+class ParseResult:
+    rows: list[PrecioRow]
+    total_pages: int
+
+
+def parse_pdf(pdf_bytes: bytes, page_start: int = 0, page_end: int | None = None) -> ParseResult:
     rows: list[PrecioRow] = []
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-        for page in pdf.pages:
+        total_pages = len(pdf.pages)
+        end = page_end or total_pages
+        for page in pdf.pages[page_start:end]:
             tables = page.extract_tables()
             for table in tables:
                 if not table or len(table) < 2:
@@ -32,19 +40,19 @@ def parse_pdf(pdf_bytes: bytes) -> list[PrecioRow]:
                             rows.append(row)
                     except (ValueError, IndexError):
                         continue
-    return rows
+    return ParseResult(rows=rows, total_pages=total_pages)
 
 
 def _map_row(header: list[str], values: list[str]) -> PrecioRow | None:
     col_map = {}
     for i, h in enumerate(header):
-        if "estado" in h:
+        if "estado" in h or "entidad" in h:
             col_map["estado"] = i
-        elif "municipio" in h or "municipio" in h:
+        elif "municipio" in h:
             col_map["municipio"] = i
         elif "regi" in h:
             col_map["region"] = i
-        elif "kg" in h:
+        elif "kg" in h or "kilogramo" in h:
             col_map["precio_kg"] = i
         elif "litro" in h:
             col_map["precio_litro"] = i
@@ -52,10 +60,13 @@ def _map_row(header: list[str], values: list[str]) -> PrecioRow | None:
     if not all(k in col_map for k in ("estado", "municipio", "precio_kg", "precio_litro")):
         return None
 
+    price_kg = values[col_map["precio_kg"]].replace("$", "").replace(",", ".").strip()
+    price_litro = values[col_map["precio_litro"]].replace("$", "").replace(",", ".").strip()
+
     return PrecioRow(
         estado=values[col_map["estado"]],
         municipio=values[col_map["municipio"]],
         region_numero=int(values[col_map.get("region", 0)] or 0) if "region" in col_map else 0,
-        precio_kg=float(values[col_map["precio_kg"]].replace(",", ".")),
-        precio_litro=float(values[col_map["precio_litro"]].replace(",", ".")),
+        precio_kg=float(price_kg),
+        precio_litro=float(price_litro),
     )
