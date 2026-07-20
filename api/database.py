@@ -2,8 +2,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from api.config import settings
 
+_url = settings.DATABASE_URL
+if "ssl" not in _url and "pooler" in _url:
+    sep = "&" if "?" in _url else "?"
+    _url = f"{_url}{sep}ssl=require"
+
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    _url,
     pool_pre_ping=True,
 )
 
