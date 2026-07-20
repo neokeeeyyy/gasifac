@@ -7,3 +7,4 @@ httpx
 pdfplumber
 stripe
 python-multipart
+email-validator
