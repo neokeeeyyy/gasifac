@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Precios Gas LP — Widget</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="widget">
+    <div class="widget-header">
+      <h1>Precios Gas LP</h1>
+      <span class="badge" id="periodo">Cargando...</span>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="search" placeholder="Buscar municipio..." autocomplete="off" />
+    </div>
+
+    <div id="results" class="results"></div>
+
+    <div class="widget-footer">
+      <span>Fuente: CRE — neokey.dev/gasifac</span>
+    </div>
+  </div>
+
+  <script src="widget.js"></script>
+</body>
+</html>

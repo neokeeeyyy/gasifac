@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.py" },
+    { "source": "/gasifac", "destination": "/public/gasifac/index.html" },
+    { "source": "/gasifac/pricing", "destination": "/public/gasifac/pricing.html" },
+    { "source": "/gasifac/widget", "destination": "/public/gasifac/widget/index.html" },
+    { "source": "/gasifac/(.*)", "destination": "/public/gasifac/$1" }
+  ]
+}

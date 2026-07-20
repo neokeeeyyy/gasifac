@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planes — Gasifac</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero small">
+    <div class="container">
+      <a href="/gasifac" class="back-link">← Gasifac</a>
+      <h1>Planes</h1>
+    </div>
+  </header>
+
+  <main>
+    <section class="pricing">
+      <div class="container">
+        <div class="pricing-grid">
+          <div class="plan-card">
+            <h3>Free</h3>
+            <p class="price">$0 <span>/mes</span></p>
+            <ul>
+              <li>Widget embebible</li>
+              <li>Precios actuales</li>
+              <li>Soporte básico</li>
+            </ul>
+            <button class="btn-outline" disabled>Plan actual</button>
+          </div>
+          <div class="plan-card featured">
+            <h3>Pro</h3>
+            <p class="price">$99 <span>/mes</span></p>
+            <ul>
+              <li>Todo del plan Free</li>
+              <li>Datos históricos</li>
+              <li>API completa</li>
+              <li>Sin marca de agua</li>
+              <li>Soporte prioritario</li>
+            </ul>
+            <button class="btn-primary" id="checkout-btn">Suscribirme</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Pagos procesados por Stripe — <a href="/gasifac">Volver al inicio</a></p>
+    </div>
+  </footer>
+
+  <script src="landing.js"></script>
+</body>
+</html>
