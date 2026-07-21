@@ -2,7 +2,12 @@ function injectNavbar(active) {
   var links = [
     { label: "Inicio", href: "/gasifac/", key: "inicio" },
     { label: "Herramientas", href: "/gasifac/herramientas", key: "herramientas" },
-    { label: "Comprar", href: "/gasifac/comprar", key: "comprar" }
+    { label: "Comprar", href: "/gasifac/comprar", key: "comprar" },
+    { label: "Nosotros", href: "/gasifac/nosotros", key: "nosotros" },
+    { label: "Soporte", href: "/gasifac/soporte", key: "soporte" },
+    { label: "FAQ", href: "/gasifac/faq", key: "faq" },
+    { label: "Sugerencias", href: "/gasifac/sugerencias", key: "sugerencias" },
+    { label: "Cuenta", href: "/gasifac/cuenta", key: "cuenta" }
   ];
 
   var linksHtml = links.map(function(l) {
@@ -29,22 +34,9 @@ function injectNavbar(active) {
 }
 
 function injectFooter() {
-  var footerLinks = [
-    { label: "Nosotros", href: "/gasifac/nosotros" },
-    { label: "Soporte", href: "/gasifac/soporte" },
-    { label: "FAQ", href: "/gasifac/faq" },
-    { label: "Sugerencias", href: "/gasifac/sugerencias" },
-    { label: "Cuenta", href: "/gasifac/cuenta" }
-  ];
-
-  var linksHtml = footerLinks.map(function(l) {
-    return '<a href="' + l.href + '">' + l.label + '</a>';
-  }).join("");
-
   var html =
     '<footer class="footer">' +
       '<div class="container">' +
-        '<div class="footer-links">' + linksHtml + '</div>' +
         '<p>&copy; 2026 <a href="https://neokey.dev" target="_blank">neokey</a>. Todos los derechos reservados.</p>' +
       '</div>' +
     '</footer>';

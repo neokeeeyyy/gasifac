@@ -68,18 +68,21 @@ body {
 .logo i { font-size: 1rem; color: #a3a3a3; }
 .nav-links {
   display: flex;
-  gap: 24px;
+  gap: 16px;
   list-style: none;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 .nav-links a {
   text-decoration: none;
   color: #a3a3a3;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   transition: color 0.2s;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   font-family: var(--font-display);
+  white-space: nowrap;
 }
 .nav-links a:hover, .nav-links a.active { color: #ffffff; }
 .menu-toggle {
