@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comprar — GASIFAC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="common.css" />
+  <style>
+    .main { flex: 1; max-width: 500px; width: 100%; margin: 0 auto; padding: 60px 24px 80px; }
+    .page-title { font-size: 2rem; font-weight: 800; margin-bottom: 8px; text-align: center; }
+    .page-sub { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 40px; text-align: center; }
+    .plan-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      text-align: center;
+    }
+    .plan-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .plan-price {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .plan-price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
+    .plan-period { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 28px; }
+    .plan-features {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+    .plan-features li {
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.9rem;
+      color: var(--text-sec);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .plan-features li i { color: var(--text); font-size: 0.8rem; flex-shrink: 0; }
+    .plan-btn { width: 100%; }
+  </style>
+</head>
+<body>
+
+  <main class="main">
+    <h1 class="page-title fade-up">Licencia</h1>
+    <p class="page-sub fade-up">Acceso completo a GASIFAC para tu negocio.</p>
+
+    <div class="plan-card fade-up">
+      <div class="plan-name">Plan Mensual</div>
+      <div class="plan-price">$800 <span>MXN</span></div>
+      <div class="plan-period">por mes, por licencia</div>
+
+      <ul class="plan-features">
+        <li><i class="fa-solid fa-check"></i> Datos actualizados semanalmente</li>
+        <li><i class="fa-solid fa-check"></i> Precios por municipio y estado</li>
+        <li><i class="fa-solid fa-check"></i> Widget embeddable para tu sitio</li>
+        <li><i class="fa-solid fa-check"></i> Soporte técnico por email</li>
+        <li><i class="fa-solid fa-check"></i> Cancela cuando quieras</li>
+      </ul>
+
+      <button class="btn btn-primary plan-btn" id="checkoutBtn">
+        <i class="fa-solid fa-lock" style="margin-right:6px;"></i> Suscribirme
+      </button>
+    </div>
+  </main>
+
+  <script src="components.js"></script>
+  <script>injectNavbar("comprar"); injectFooter();</script>
+  <script>
+    document.getElementById("checkoutBtn").addEventListener("click", function() {
+      var email = prompt("Ingresa tu email para continuar:");
+      if (!email) return;
+
+      fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert("Error: " + (data.detail || "No se pudo crear la sesión de pago."));
+        }
+      })
+      .catch(function() {
+        alert("Error de conexión. Intenta de nuevo.");
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nosotros — GASIFAC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="common.css" />
+  <style>
+    .main { flex: 1; max-width: 800px; width: 100%; margin: 0 auto; padding: 60px 24px 80px; }
+    .page-title { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+    .page-sub { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 48px; }
+    .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; margin-top: 40px; }
+    .section-text { color: var(--text-sec); font-size: 0.95rem; line-height: 1.8; margin-bottom: 20px; }
+    .tech-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .tech-tag {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sec);
+    }
+  </style>
+</head>
+<body>
+
+  <main class="main">
+    <h1 class="page-title fade-up">Nosotros</h1>
+    <p class="page-sub fade-up">GASIFAC es un proyecto de <strong>neokey</strong>.</p>
+
+    <p class="section-text fade-up">
+      Somos un estudio de desarrollo enfocado en crear herramientas prácticas para negocios locales en México. Creemos que la tecnología accesible puede transformar la forma en que las pequeñas y medianas empresas toman decisiones.
+    </p>
+
+    <h2 class="section-title fade-up">Misión</h2>
+    <p class="section-text fade-up">
+      Proporcionar datos públicos de forma clara y útil, ayudando a las personas a entender costos operativos como el gas LP, sin complicaciones técnicas.
+    </p>
+
+    <h2 class="section-title fade-up">GASIFAC</h2>
+    <p class="section-text fade-up">
+      Nuestra primera herramienta extrae, procesa y presenta los precios máximos de gas LP publicados por la CRE (Comisión Reguladora de Energía) por municipio. Los datos se actualizan semanalmente y están disponibles para consulta, integración web y descarga.
+    </p>
+
+    <h2 class="section-title fade-up">Tecnología</h2>
+    <div class="tech-list fade-up">
+      <span class="tech-tag">Python</span>
+      <span class="tech-tag">FastAPI</span>
+      <span class="tech-tag">SQLAlchemy</span>
+      <span class="tech-tag">PostgreSQL</span>
+      <span class="tech-tag">Supabase</span>
+      <span class="tech-tag">Stripe</span>
+      <span class="tech-tag">Vercel</span>
+      <span class="tech-tag">pdfplumber</span>
+    </div>
+  </main>
+
+  <script src="components.js"></script>
+  <script>injectNavbar("inicio"); injectFooter();</script>
+</body>
+</html>

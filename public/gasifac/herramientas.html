@@ -4,127 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Herramientas — GASIFAC</title>
-  <meta name="description" content="Busca y filtra los precios máximos de gas LP por municipio y estado en México." />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="common.css" />
   <style>
-    @font-face {
-      font-family: 'Staff X Wide';
-      src: url('fonts/Staff-XWide.otf') format('opentype');
-      font-weight: normal;
-      font-style: normal;
-    }
+    .main { flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 40px 24px 60px; }
+    .page-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+    .page-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 32px; }
 
-    :root {
-      --bg: #ffffff;
-      --bg-alt: #f5f5f5;
-      --border: #d4d4d4;
-      --text: #171717;
-      --text-sec: #525252;
-      --text-muted: #a3a3a3;
-      --font-display: 'Staff X Wide', 'Arial Black', sans-serif;
-      --font-body: "Segoe UI", system-ui, -apple-system, sans-serif;
-      --radius: 10px;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: var(--font-body);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Navbar */
-    .navbar {
-      background: #171717;
-      padding: 0;
-    }
-    .nav-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 56px;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: #ffffff;
-      font-weight: 800;
-      font-size: 1.1rem;
-      letter-spacing: 2px;
-      font-family: var(--font-display);
-    }
-    .logo i { font-size: 1rem; color: #a3a3a3; }
-    .nav-links {
-      display: flex;
-      gap: 24px;
-      list-style: none;
-    }
-    .nav-links a {
-      text-decoration: none;
-      color: #a3a3a3;
-      font-size: 0.8rem;
-      font-weight: 600;
-      transition: color 0.2s;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      font-family: var(--font-display);
-    }
-    .nav-links a:hover, .nav-links a.active { color: #ffffff; }
-    .menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-    }
-    .menu-toggle span {
-      display: block;
-      width: 22px;
-      height: 2px;
-      background: #ffffff;
-      margin: 5px 0;
-    }
-
-    /* Main */
-    .main {
-      flex: 1;
-      max-width: 1100px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 40px 24px 60px;
-    }
-
-    .page-title {
-      font-size: 1.6rem;
-      font-weight: 800;
-      margin-bottom: 6px;
-      color: var(--text);
-    }
-    .page-sub {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 32px;
-    }
-
-    /* Search */
-    .search-bar {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-    .search-bar input,
-    .search-bar select {
+    .search-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .search-bar input, .search-bar select {
       font-family: var(--font-body);
       font-size: 0.9rem;
       padding: 10px 16px;
@@ -135,22 +23,11 @@
       color: var(--text);
       transition: border-color 0.2s;
     }
-    .search-bar input:focus,
-    .search-bar select:focus {
-      border-color: var(--text);
-    }
-    .search-bar input[type="text"] {
-      flex: 1;
-      min-width: 200px;
-    }
+    .search-bar input:focus, .search-bar select:focus { border-color: var(--text); }
+    .search-bar input[type="text"] { flex: 1; min-width: 200px; }
     .search-bar select { min-width: 180px; }
 
-    .unit-toggle {
-      display: flex;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-    }
+    .unit-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
     .unit-toggle button {
       font-family: var(--font-body);
       font-size: 0.8rem;
@@ -161,35 +38,13 @@
       color: var(--text-sec);
       cursor: pointer;
       transition: all 0.2s;
-      letter-spacing: 0.5px;
     }
-    .unit-toggle button.active {
-      background: var(--text);
-      color: var(--bg);
-    }
-    .unit-toggle button:not(.active):hover {
-      background: var(--bg-alt);
-    }
+    .unit-toggle button.active { background: var(--text); color: var(--bg); }
+    .unit-toggle button:not(.active):hover { background: var(--bg-alt); }
 
-    /* Results */
-    .results-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      color: var(--text-sec);
-      font-size: 0.85rem;
-    }
-    .results-table {
-      width: 100%;
-      border-collapse: collapse;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .results-table thead {
-      background: var(--bg-alt);
-    }
+    .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: var(--text-sec); font-size: 0.85rem; }
+    .results-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .results-table thead { background: var(--bg-alt); }
     .results-table th {
       font-family: var(--font-body);
       font-size: 0.75rem;
@@ -205,68 +60,15 @@
       background: var(--bg-alt);
       z-index: 10;
     }
-    .results-table td {
-      font-size: 0.9rem;
-      padding: 12px 16px;
-      border-bottom: 1px solid #f0f0f0;
-      color: var(--text);
-    }
-    .results-table tbody tr:hover {
-      background: var(--bg-alt);
-    }
-    .results-table .price-cell {
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      text-align: right;
-    }
+    .results-table td { font-size: 0.9rem; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+    .results-table tbody tr:hover { background: var(--bg-alt); }
+    .results-table .price-cell { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
     .results-table .municipio-cell { font-weight: 600; }
-    .results-table .estado-cell {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-    }
-    .results-empty {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-    .results-scroll {
-      overflow-x: auto;
-    }
-
-    /* Footer */
-    .footer {
-      border-top: 1px solid var(--border);
-      padding: 28px 0;
-      text-align: center;
-    }
-    .footer a {
-      color: var(--text-sec);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .footer a:hover { text-decoration: underline; }
-    .footer p {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-    }
+    .results-table .estado-cell { color: var(--text-muted); font-size: 0.8rem; }
+    .results-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.9rem; }
+    .results-scroll { overflow-x: auto; }
 
     @media (max-width: 768px) {
-      .nav-links {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        background: #171717;
-        flex-direction: column;
-        padding: 20px 0;
-        text-align: center;
-        gap: 20px;
-        border-bottom: 1px solid #333;
-      }
-      .nav-links.active { display: flex; }
-      .menu-toggle { display: block; }
       .search-bar { flex-direction: column; }
       .search-bar input[type="text"] { min-width: unset; }
       .search-bar select { min-width: unset; }
@@ -274,23 +76,6 @@
   </style>
 </head>
 <body>
-
-  <header class="navbar">
-    <div class="nav-container">
-      <a href="/gasifac" class="logo">
-        <i class="fa-solid fa-fire"></i>
-        <span>GASIFAC</span>
-      </a>
-      <button class="menu-toggle" id="menuToggle" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="/gasifac">Inicio</a></li>
-        <li><a href="/gasifac/herramientas" class="active">Herramientas</a></li>
-        <li><a href="/gasifac#plataformas">Plataformas</a></li>
-      </ul>
-    </div>
-  </header>
 
   <main class="main">
     <h1 class="page-title">Precios de gas LP</h1>
@@ -330,50 +115,32 @@
     </div>
   </main>
 
-  <footer class="footer">
-    <div class="container">
-      <p>&copy; 2026 <a href="https://neokey.dev" target="_blank">neokey</a>. Todos los derechos reservados.</p>
-    </div>
-  </footer>
-
+  <script src="components.js"></script>
+  <script>injectNavbar("herramientas"); injectFooter();</script>
   <script>
-    const API = "/api/gas/v1";
-    let allPrices = [];
-    let currentUnit = "kg";
+    var API = "/api/gas/v1";
+    var allPrices = [];
+    var currentUnit = "kg";
 
-    document.addEventListener("DOMContentLoaded", () => {
-      setupMenu();
+    document.addEventListener("DOMContentLoaded", function() {
       setupSearch();
       loadEstados();
       loadPrices();
     });
 
-    function setupMenu() {
-      const toggle = document.getElementById("menuToggle");
-      const links = document.getElementById("navLinks");
-      if (!toggle || !links) return;
-      toggle.addEventListener("click", () => links.classList.toggle("active"));
-      links.querySelectorAll("a").forEach(a =>
-        a.addEventListener("click", () => links.classList.remove("active"))
-      );
-    }
-
     function setupSearch() {
-      const input = document.getElementById("searchInput");
-      const select = document.getElementById("estadoFilter");
-      const toggleBtns = document.querySelectorAll(".unit-toggle button");
-
-      let debounce;
-      input.addEventListener("input", () => {
+      var input = document.getElementById("searchInput");
+      var select = document.getElementById("estadoFilter");
+      var btns = document.querySelectorAll(".unit-toggle button");
+      var debounce;
+      input.addEventListener("input", function() {
         clearTimeout(debounce);
         debounce = setTimeout(filterResults, 200);
       });
-
       select.addEventListener("change", filterResults);
-
-      toggleBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-          toggleBtns.forEach(b => b.classList.remove("active"));
+      btns.forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          btns.forEach(function(b) { b.classList.remove("active"); });
           btn.classList.add("active");
           currentUnit = btn.dataset.unit;
           filterResults();
@@ -381,48 +148,38 @@
       });
     }
 
-    async function loadEstados() {
-      try {
-        const res = await fetch(`${API}/estados`);
-        const estados = await res.json();
-        const select = document.getElementById("estadoFilter");
-        estados.forEach(e => {
-          const opt = document.createElement("option");
+    function loadEstados() {
+      fetch(API + "/estados").then(function(r) { return r.json(); }).then(function(estados) {
+        var sel = document.getElementById("estadoFilter");
+        estados.forEach(function(e) {
+          var opt = document.createElement("option");
           opt.value = e;
           opt.textContent = e;
-          select.appendChild(opt);
+          sel.appendChild(opt);
         });
-      } catch {}
+      }).catch(function() {});
     }
 
-    async function loadPrices() {
-      try {
-        const res = await fetch(`${API}/precios`);
-        allPrices = await res.json();
-      } catch {}
+    function loadPrices() {
+      fetch(API + "/precios").then(function(r) { return r.json(); }).then(function(data) {
+        allPrices = data;
+      }).catch(function() {});
     }
 
     function filterResults() {
-      const query = document.getElementById("searchInput").value.toLowerCase().trim();
-      const estado = document.getElementById("estadoFilter").value;
-      const table = document.getElementById("resultsTable");
-      const tbody = document.getElementById("resultsBody");
-      const header = document.getElementById("resultsHeader");
-      const countEl = document.getElementById("resultsCount");
-      const empty = document.getElementById("resultsEmpty");
+      var query = document.getElementById("searchInput").value.toLowerCase().trim();
+      var estado = document.getElementById("estadoFilter").value;
+      var table = document.getElementById("resultsTable");
+      var tbody = document.getElementById("resultsBody");
+      var header = document.getElementById("resultsHeader");
+      var countEl = document.getElementById("resultsCount");
+      var empty = document.getElementById("resultsEmpty");
+      var filtered = allPrices;
 
-      let filtered = allPrices;
-
-      if (estado) {
-        filtered = filtered.filter(p => p.estado === estado);
-      }
-
-      if (query) {
-        filtered = filtered.filter(p =>
-          p.municipio_nombre.toLowerCase().includes(query) ||
-          p.estado.toLowerCase().includes(query)
-        );
-      }
+      if (estado) filtered = filtered.filter(function(p) { return p.estado === estado; });
+      if (query) filtered = filtered.filter(function(p) {
+        return p.municipio_nombre.toLowerCase().indexOf(query) !== -1 || p.estado.toLowerCase().indexOf(query) !== -1;
+      });
 
       if (filtered.length === 0 && (query || estado)) {
         table.style.display = "none";
@@ -431,7 +188,6 @@
         empty.innerHTML = '<i class="fa-solid fa-circle-info" style="font-size:1.2rem;color:var(--border);display:block;margin-bottom:12px;"></i>Sin resultados para esta búsqueda.';
         return;
       }
-
       if (!query && !estado) {
         table.style.display = "none";
         header.style.display = "none";
@@ -443,17 +199,12 @@
       empty.style.display = "none";
       table.style.display = "table";
       header.style.display = "flex";
-      countEl.textContent = `${filtered.length} resultado${filtered.length !== 1 ? "s" : ""}`;
-
+      countEl.textContent = filtered.length + " resultado" + (filtered.length !== 1 ? "s" : "");
       tbody.innerHTML = "";
-      filtered.forEach(p => {
-        const price = currentUnit === "kg" ? p.precio_kg : p.precio_litro;
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="municipio-cell">${p.municipio_nombre}</td>
-          <td class="estado-cell">${p.estado}</td>
-          <td class="price-cell">$${price.toFixed(2)} / ${currentUnit}</td>
-        `;
+      filtered.forEach(function(p) {
+        var price = currentUnit === "kg" ? p.precio_kg : p.precio_litro;
+        var tr = document.createElement("tr");
+        tr.innerHTML = '<td class="municipio-cell">' + p.municipio_nombre + '</td><td class="estado-cell">' + p.estado + '</td><td class="price-cell">$' + price.toFixed(2) + ' / ' + currentUnit + '</td>';
         tbody.appendChild(tr);
       });
     }

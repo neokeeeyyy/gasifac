@@ -6,106 +6,8 @@
   <title>GASIFAC — Precios de gas LP en México</title>
   <meta name="description" content="Consulta los precios máximos de gas LP por municipio en México. Datos oficiales de la CRE, actualizados semanalmente." />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="common.css" />
   <style>
-    @font-face {
-      font-family: 'Staff X Wide';
-      src: url('fonts/Staff-XWide.otf') format('opentype');
-      font-weight: normal;
-      font-style: normal;
-    }
-
-    :root {
-      --bg: #ffffff;
-      --bg-alt: #f5f5f5;
-      --bg-card: #ffffff;
-      --border: #d4d4d4;
-      --text: #171717;
-      --text-sec: #525252;
-      --text-muted: #a3a3a3;
-      --accent: #404040;
-      --accent-hover: #262626;
-      --accent-glow: rgba(0, 0, 0, 0.04);
-      --font-display: 'Staff X Wide', 'Arial Black', sans-serif;
-      --font-body: "Segoe UI", system-ui, -apple-system, sans-serif;
-      --radius: 10px;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: var(--font-body);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* Navbar */
-    .navbar {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      background: #171717;
-      padding: 0;
-    }
-    .nav-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 56px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: #ffffff;
-      font-weight: 800;
-      font-size: 1.1rem;
-      letter-spacing: 2px;
-      font-family: var(--font-display);
-    }
-    .logo i { font-size: 1rem; color: #a3a3a3; }
-    .nav-links {
-      display: flex;
-      gap: 24px;
-      list-style: none;
-    }
-    .nav-links a {
-      text-decoration: none;
-      color: #a3a3a3;
-      font-size: 0.8rem;
-      font-weight: 600;
-      transition: color 0.2s;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      font-family: var(--font-display);
-    }
-    .nav-links a:hover { color: #ffffff; }
-    .menu-toggle {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-    }
-    .menu-toggle span {
-      display: block;
-      width: 22px;
-      height: 2px;
-      background: #ffffff;
-      margin: 5px 0;
-      transition: 0.3s;
-    }
-
-    /* Hero */
     .hero {
       padding: 80px 0 60px;
       text-align: center;
@@ -115,7 +17,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: var(--accent-glow);
+      background: var(--bg-alt);
       border: 1px solid var(--border);
       padding: 6px 16px;
       border-radius: 999px;
@@ -145,65 +47,6 @@
       justify-content: center;
       gap: 14px;
     }
-    .btn {
-      display: inline-block;
-      padding: 12px 26px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .btn-primary {
-      background: var(--text);
-      color: var(--bg);
-      border: 1px solid var(--text);
-    }
-    .btn-primary:hover {
-      background: #000000;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    }
-    .btn-outline {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-outline:hover {
-      border-color: var(--text);
-      transform: translateY(-2px);
-    }
-
-    /* Divider */
-    .divider {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 60px 0 40px;
-      position: relative;
-    }
-    .divider-line {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border), transparent);
-      width: 100%;
-      position: absolute;
-    }
-    .divider-label {
-      position: relative;
-      background: var(--bg);
-      padding: 0 20px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--text-sec);
-      font-family: var(--font-display);
-    }
-
-    /* Platforms */
-    .platforms { padding: 0 0 80px; }
     .platform-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -238,61 +81,7 @@
       font-weight: 600;
       letter-spacing: 0.5px;
     }
-
-    /* Footer */
-    .footer {
-      border-top: 1px solid var(--border);
-      padding: 28px 0;
-      text-align: center;
-    }
-    .footer a {
-      color: var(--text-sec);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .footer a:hover { text-decoration: underline; }
-    .footer p {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-    }
-
-    /* Animations */
-    .fade-up {
-      opacity: 0;
-      transform: translateY(24px);
-      animation: fadeInUp 0.6s ease forwards;
-    }
-    .fade-up:nth-child(1) { animation-delay: 0.1s; }
-    .fade-up:nth-child(2) { animation-delay: 0.2s; }
-    .fade-up:nth-child(3) { animation-delay: 0.3s; }
-    .fade-up:nth-child(4) { animation-delay: 0.4s; }
-    .fade-up:nth-child(5) { animation-delay: 0.5s; }
-
-    @keyframes fadeInUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .fade-up { animation: none; opacity: 1; transform: none; }
-    }
-
-    /* Responsive */
     @media (max-width: 768px) {
-      .nav-links {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        background: #171717;
-        flex-direction: column;
-        padding: 20px 0;
-        text-align: center;
-        gap: 20px;
-        border-bottom: 1px solid #333;
-      }
-      .nav-links.active { display: flex; }
-      .menu-toggle { display: block; }
       .cta-row { flex-direction: column; align-items: center; }
       .cta-row .btn { width: 100%; max-width: 280px; text-align: center; }
       .platform-grid { grid-template-columns: 1fr; max-width: 280px; }
@@ -301,27 +90,7 @@
 </head>
 <body>
 
-  <!-- Navbar -->
-  <header class="navbar">
-    <div class="container nav-container">
-      <a href="/gasifac" class="logo">
-        <i class="fa-solid fa-fire"></i>
-        <span>GASIFAC</span>
-      </a>
-      <button class="menu-toggle" id="menuToggle" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="#inicio">Inicio</a></li>
-        <li><a href="/gasifac/herramientas">Herramientas</a></li>
-        <li><a href="#plataformas">Plataformas</a></li>
-      </ul>
-    </div>
-  </header>
-
   <main class="container">
-
-    <!-- Hero -->
     <section class="hero" id="inicio">
       <div class="hero-badge fade-up">
         <i class="fa-solid fa-bolt"></i>
@@ -331,18 +100,16 @@
       <p class="hero-sub fade-up">Datos oficiales de la CRE por municipio, actualizados cada semana.</p>
       <div class="cta-row fade-up">
         <a href="/gasifac/herramientas" class="btn btn-primary">Consultar Precios</a>
-        <a href="#plataformas" class="btn btn-outline">Conocer Más</a>
+        <a href="/gasifac/nosotros" class="btn btn-outline">Conocer Más</a>
       </div>
     </section>
 
-    <!-- Divider: Plataformas -->
     <div class="divider" id="plataformas">
       <div class="divider-line"></div>
       <h2 class="divider-label">Plataformas</h2>
     </div>
 
-    <!-- Platforms -->
-    <section class="platforms fade-up">
+    <section class="fade-up" style="padding-bottom:80px;">
       <div class="platform-grid">
         <div class="platform-card">
           <i class="fa-brands fa-linux"></i>
@@ -358,16 +125,9 @@
         </div>
       </div>
     </section>
-
   </main>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <p>&copy; 2026 <a href="https://neokey.dev" target="_blank">neokey</a>. Todos los derechos reservados.</p>
-    </div>
-  </footer>
-
-  <script src="landing.js"></script>
+  <script src="components.js"></script>
+  <script>injectNavbar("inicio"); injectFooter();</script>
 </body>
 </html>

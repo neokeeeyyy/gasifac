@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soporte — GASIFAC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="common.css" />
+  <style>
+    .main { flex: 1; max-width: 700px; width: 100%; margin: 0 auto; padding: 60px 24px 80px; }
+    .page-title { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+    .page-sub { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 40px; }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .contact-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+    }
+    .contact-card i { font-size: 1.6rem; color: var(--text-sec); margin-bottom: 12px; display: block; }
+    .contact-card .label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+    .contact-card .value { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .contact-card a { color: var(--text); text-decoration: none; }
+    .contact-card a:hover { text-decoration: underline; }
+    .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; margin-top: 40px; }
+    .section-text { color: var(--text-sec); font-size: 0.95rem; line-height: 1.8; }
+  </style>
+</head>
+<body>
+
+  <main class="main">
+    <h1 class="page-title fade-up">Soporte</h1>
+    <p class="page-sub fade-up">¿Necesitas ayuda? Contáctanos.</p>
+
+    <div class="contact-grid fade-up">
+      <div class="contact-card">
+        <i class="fa-solid fa-envelope"></i>
+        <div class="label">Email</div>
+        <div class="value"><a href="mailto:soporte@neokey.dev">soporte@neokey.dev</a></div>
+      </div>
+      <div class="contact-card">
+        <i class="fa-solid fa-clock"></i>
+        <div class="label">Horario</div>
+        <div class="value">Lun — Vie, 9am — 6pm</div>
+      </div>
+      <div class="contact-card">
+        <i class="fa-solid fa-location-dot"></i>
+        <div class="label">Ubicación</div>
+        <div class="value">Altos Norte, Jalisco</div>
+      </div>
+    </div>
+
+    <h2 class="section-title fade-up">¿Qué podemos ayudarte?</h2>
+    <p class="section-text fade-up">
+      Si tienes problemas con tu licencia, el widget, la integración o cualquier aspecto de GASIFAC, envíanos un email a <strong>soporte@neokey.dev</strong> con tu nombre, email de registro y una descripción del problema. Respondemos en un máximo de 24 horas hábiles.
+    </p>
+
+    <h2 class="section-title fade-up">Reportes de errores</h2>
+    <p class="section-text fade-up">
+      Si encontraste un error en los datos o en la plataforma, por favor incluye:
+    </p>
+    <p class="section-text" style="padding-left:16px;">
+      — Municipio y estado afectado<br>
+      — Fecha en que se detectó el problema<br>
+      — Captura de pantalla (si es posible)
+    </p>
+  </main>
+
+  <script src="components.js"></script>
+  <script>injectNavbar("inicio"); injectFooter();</script>
+</body>
+</html>
