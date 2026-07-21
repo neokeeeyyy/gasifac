@@ -5,6 +5,7 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.py" },
+    { "src": "/gasifac/([^/.]+)$", "dest": "/public/gasifac/$1.html" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/api/index.py" }
   ]
