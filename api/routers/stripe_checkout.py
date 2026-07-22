@@ -1,3 +1,4 @@
+import json
 import os
 
 import stripe
@@ -9,6 +10,7 @@ from api.config import settings
 from api.database import get_db
 from api.models import Pago, Suscripcion, Usuario
 from api.schemas import CheckoutRequest, CheckoutResponse
+from api.services.license_generator import generate_pro_license
 
 router = APIRouter(prefix="/api/stripe", tags=["stripe"])
 
@@ -35,7 +37,10 @@ async def create_checkout(body: CheckoutRequest, db: AsyncSession = Depends(get_
         success_url=body.success_url,
         cancel_url=body.cancel_url,
         customer_email=body.email,
-        metadata={"usuario_id": str(usuario.id)},
+        metadata={
+            "usuario_id": str(usuario.id),
+            "machine_id": body.machine_id,
+        },
     )
     return CheckoutResponse(checkout_url=session.url)
 
@@ -70,6 +75,7 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
 async def _handle_checkout_completed(session, db: AsyncSession):
     usuario_id = session.get("metadata", {}).get("usuario_id")
+    machine_id = session.get("metadata", {}).get("machine_id")
     if not usuario_id:
         return
     result = await db.execute(select(Usuario).where(Usuario.id == usuario_id))
@@ -85,6 +91,22 @@ async def _handle_checkout_completed(session, db: AsyncSession):
         db.add(sub)
         usuario.plan = "pro"
         await db.commit()
+
+    if machine_id and usuario:
+        license_data = generate_pro_license(machine_id, usuario.email)
+        if license_data:
+            import httpx
+            url = f"{settings.SUPABASE_URL}/storage/v1/object/gasifac/licenses/{machine_id}.json"
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                await client.post(
+                    url,
+                    content=json.dumps(license_data, indent=2).encode(),
+                    headers={
+                        "Authorization": f"Bearer {settings.SUPABASE_SERVICE_ROLE_KEY}",
+                        "Content-Type": "application/json",
+                        "x-upsert": "true",
+                    },
+                )
 
 
 async def _handle_subscription_updated(subscription, db: AsyncSession):

@@ -6,7 +6,7 @@ from api.routers.precios import router as gas_router
 from api.routers.stats import router as stats_router
 from api.routers.stripe_checkout import router as stripe_router
 
-app = FastAPI(title="Gasifac API", version="1.0.0")
+app = FastAPI(title="Gasifac API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,

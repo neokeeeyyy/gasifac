@@ -25,7 +25,7 @@ class Municipio(Base):
     __tablename__ = "municipios"
     __table_args__ = (
         UniqueConstraint("estado", "municipio", name="uq_municipio_estado"),
-        {"schema": "gas_lp"},
+        {"schema": "gasifac"},
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -43,11 +43,11 @@ class Precio(Base):
     __tablename__ = "precios"
     __table_args__ = (
         UniqueConstraint("municipio_id", "fecha_inicio", name="uq_precio_municipio_fecha"),
-        {"schema": "gas_lp"},
+        {"schema": "gasifac"},
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    municipio_id = Column(Integer, ForeignKey("gas_lp.municipios.id", ondelete="CASCADE"), nullable=False)
+    municipio_id = Column(Integer, ForeignKey("gasifac.municipios.id", ondelete="CASCADE"), nullable=False)
     precio_kg = Column(Numeric(6, 2), nullable=False)
     precio_litro = Column(Numeric(6, 2), nullable=False)
     fecha_inicio = Column(Date, nullable=False)
@@ -59,7 +59,7 @@ class Precio(Base):
 
 class Actualizacion(Base):
     __tablename__ = "actualizaciones"
-    __table_args__ = {"schema": "gas_lp"}
+    __table_args__ = {"schema": "gasifac"}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     fecha_descarga = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -72,7 +72,7 @@ class Actualizacion(Base):
 
 class ProcesamientoEstado(Base):
     __tablename__ = "procesamiento_estado"
-    __table_args__ = {"schema": "gas_lp"}
+    __table_args__ = {"schema": "gasifac"}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     pdf_url = Column(String(500), nullable=False)
@@ -89,7 +89,7 @@ class ProcesamientoEstado(Base):
 
 class Usuario(Base):
     __tablename__ = "usuarios"
-    __table_args__ = {"schema": "gas_lp"}
+    __table_args__ = {"schema": "gasifac"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False)
@@ -108,7 +108,7 @@ class Suscripcion(Base):
     __table_args__ = {"schema": "landing"}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    usuario_id = Column(UUID(as_uuid=True), ForeignKey("gas_lp.usuarios.id", ondelete="CASCADE"), nullable=False)
+    usuario_id = Column(UUID(as_uuid=True), ForeignKey("gasifac.usuarios.id", ondelete="CASCADE"), nullable=False)
     stripe_subscription_id = Column(String(255), unique=True)
     stripe_price_id = Column(String(255))
     status = Column(String(50), nullable=False)
@@ -125,7 +125,7 @@ class Pago(Base):
     __table_args__ = {"schema": "landing"}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    usuario_id = Column(UUID(as_uuid=True), ForeignKey("gas_lp.usuarios.id", ondelete="CASCADE"), nullable=False)
+    usuario_id = Column(UUID(as_uuid=True), ForeignKey("gasifac.usuarios.id", ondelete="CASCADE"), nullable=False)
     stripe_payment_intent_id = Column(String(255), unique=True)
     stripe_invoice_id = Column(String(255))
     monto_cents = Column(Integer, nullable=False)

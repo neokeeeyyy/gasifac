@@ -6,7 +6,7 @@ from api.database import get_db
 from api.models import Municipio, Precio
 from api.schemas import EstadisticasOut, MunicipioOut, PeriodoOut, PrecioOut
 
-router = APIRouter(prefix="/api/gas/v1", tags=["gas-lp"])
+router = APIRouter(prefix="/api/v1", tags=["gasifac"])
 
 
 @router.get("/health")
@@ -113,6 +113,60 @@ async def precio_por_municipio(municipio_id: int, db: AsyncSession = Depends(get
         fecha_inicio=p.fecha_inicio,
         fecha_fin=p.fecha_fin,
     )
+
+
+@router.get("/precios-cercanos")
+async def precios_cercanos(
+    lat: float = Query(...),
+    lng: float = Query(...),
+    limit: int = Query(15, ge=1, le=50),
+    db: AsyncSession = Depends(get_db),
+):
+    delta = 1.5
+    bounds = (lat - delta, lat + delta, lng - delta, lng + delta)
+    subq = (
+        select(
+            Precio.municipio_id,
+            func.max(Precio.fecha_inicio).label("max_fecha"),
+        )
+        .group_by(Precio.municipio_id)
+        .subquery()
+    )
+    query = (
+        select(Precio, Municipio.municipio, Municipio.estado)
+        .join(Municipio, Precio.municipio_id == Municipio.id)
+        .join(
+            subq,
+            (Precio.municipio_id == subq.c.municipio_id)
+            & (Precio.fecha_inicio == subq.c.max_fecha),
+        )
+        .where(
+            Municipio.latitud.isnot(None),
+            Municipio.longitud.isnot(None),
+            Municipio.latitud >= bounds[0],
+            Municipio.latitud <= bounds[1],
+            Municipio.longitud >= bounds[2],
+            Municipio.longitud <= bounds[3],
+        )
+        .order_by(
+            func.abs(Municipio.latitud - lat) + func.abs(Municipio.longitud - lng)
+        )
+        .limit(limit)
+    )
+    result = await db.execute(query)
+    return [
+        PrecioOut(
+            id=p.id,
+            municipio_id=p.municipio_id,
+            municipio_nombre=mun,
+            estado=est,
+            precio_kg=float(p.precio_kg),
+            precio_litro=float(p.precio_litro),
+            fecha_inicio=p.fecha_inicio,
+            fecha_fin=p.fecha_fin,
+        )
+        for p, mun, est in result.all()
+    ]
 
 
 @router.get("/estadisticas", response_model=EstadisticasOut)

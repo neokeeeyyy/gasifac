@@ -8,7 +8,7 @@ from api.database import get_db
 from api.models import ProcesamientoEstado
 from api.services.updater import run_update
 
-router = APIRouter(prefix="/api/gas/v1", tags=["gas-lp-admin"])
+router = APIRouter(prefix="/api/v1", tags=["gasifac-admin"])
 
 
 @router.post("/trigger-update")

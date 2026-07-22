@@ -44,6 +44,43 @@ function injectFooter() {
   document.body.insertAdjacentHTML("beforeend", html);
 }
 
+function injectMarquee() {
+  if (document.getElementById("marqueeWrap")) return;
+  var wrap = document.createElement("div");
+  wrap.className = "marquee-wrap";
+  wrap.id = "marqueeWrap";
+  var track = document.createElement("div");
+  track.className = "marquee-track";
+  track.id = "marqueeTrack";
+  wrap.appendChild(track);
+  var nav = document.querySelector(".navbar");
+  if (nav) nav.parentNode.insertBefore(wrap, nav.nextSibling);
+  loadMarqueePrices();
+}
+
+function loadMarqueePrices() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    var lat = pos.coords.latitude;
+    var lng = pos.coords.longitude;
+    fetch("/api/v1/precios-cercanos?lat=" + lat + "&lng=" + lng + "&limit=20")
+      .then(function(r) { return r.json(); })
+      .then(renderMarquee)
+      .catch(function() {});
+  }, function() {}, { timeout: 5000, enableHighAccuracy: false });
+}
+
+function renderMarquee(data) {
+  var track = document.getElementById("marqueeTrack");
+  if (!track || !data || data.length === 0) return;
+  var html = "";
+  var items = data.concat(data);
+  items.forEach(function(p) {
+    html += '<span class="marquee-item">' + p.municipio_nombre + ', ' + p.estado + ': <span class="price">$' + p.precio_kg.toFixed(2) + '/kg</span></span>';
+  });
+  track.innerHTML = html;
+}
+
 function setupMenu() {
   var toggle = document.getElementById("menuToggle");
   var links = document.getElementById("navLinks");

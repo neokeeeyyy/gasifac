@@ -5,7 +5,7 @@ import httpx
 
 from api.config import settings
 
-CRE_INDEX_URL = "https://www.gob.mx/cne/articulos/precios-maximos-de-gas-lp-399035"
+CRE_INDEX_URL = "https://www.gob.mx/cne/articulos/precios-maximos-de-gasifac-399035"
 
 
 async def find_latest_pdf_url() -> str:
@@ -31,7 +31,7 @@ async def download_pdf(url: str) -> bytes:
 async def upload_to_storage(pdf_bytes: bytes) -> str:
     today = date.today().isoformat()
     path = f"cre/{today}/precios.pdf"
-    url = f"{settings.SUPABASE_URL}/storage/v1/object/gas-lp/{path}"
+    url = f"{settings.SUPABASE_URL}/storage/v1/object/gasifac/{path}"
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.post(
             url,
@@ -48,7 +48,7 @@ async def upload_to_storage(pdf_bytes: bytes) -> str:
 
 
 async def download_from_storage(path: str) -> bytes:
-    url = f"{settings.SUPABASE_URL}/storage/v1/object/gas-lp/{path}"
+    url = f"{settings.SUPABASE_URL}/storage/v1/object/gasifac/{path}"
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.get(
             url,

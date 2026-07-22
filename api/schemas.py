@@ -41,8 +41,9 @@ class EstadisticasOut(BaseModel):
 
 class CheckoutRequest(BaseModel):
     email: EmailStr
-    success_url: str = "https://neokey.dev/gasifac/pricing?success=true"
-    cancel_url: str = "https://neokey.dev/gasifac/pricing?cancelled=true"
+    machine_id: str
+    success_url: str = "https://neokey.dev/gasifac/comprar?success=true"
+    cancel_url: str = "https://neokey.dev/gasifac/comprar?cancelled=true"
 
 
 class CheckoutResponse(BaseModel):

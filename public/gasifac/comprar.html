@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Comprar — GASIFAC</title>
+  <title>Comprar — Gasifac</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="common.css" />
   <style>
-    .main { flex: 1; max-width: 500px; width: 100%; margin: 0 auto; padding: 60px 24px 80px; }
-    .page-title { font-size: 2rem; font-weight: 800; margin-bottom: 8px; text-align: center; }
-    .page-sub { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 40px; text-align: center; }
+    .main { flex: 1; max-width: 540px; width: 100%; margin: 0 auto; padding: 60px 24px 80px; }
+    .page-title { font-size: 2rem; font-weight: 800; margin-bottom: 4px; text-align: center; }
+    .page-sub { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 8px; text-align: center; }
     .plan-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -17,14 +17,16 @@
       padding: 36px 32px;
       text-align: center;
     }
+    .plan-icon { font-size: 2rem; color: var(--text); margin-bottom: 12px; display: block; }
     .plan-name {
       font-size: 0.8rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 2px;
       color: var(--text-muted);
-      margin-bottom: 16px;
+      margin-bottom: 4px;
     }
+    .plan-desc { font-size: 0.85rem; color: var(--text-sec); margin-bottom: 16px; }
     .plan-price {
       font-size: 3rem;
       font-weight: 800;
@@ -33,43 +35,93 @@
       margin-bottom: 4px;
     }
     .plan-price span { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
-    .plan-period { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 28px; }
+    .plan-period { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sec);
+      margin-bottom: 4px;
+    }
+    .form-group input {
+      width: 100%;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: var(--text); }
+    .form-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    .plan-btn { width: 100%; margin-top: 8px; }
     .plan-features {
       list-style: none;
       text-align: left;
-      margin-bottom: 28px;
+      margin: 24px 0 8px;
     }
     .plan-features li {
-      padding: 10px 0;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 0.9rem;
+      padding: 8px 0;
+      font-size: 0.85rem;
       color: var(--text-sec);
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .plan-features li i { color: var(--text); font-size: 0.8rem; flex-shrink: 0; }
-    .plan-btn { width: 100%; }
+    .plan-features li i { color: var(--text); font-size: 0.75rem; flex-shrink: 0; }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #171717;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
 
   <main class="main">
-    <h1 class="page-title fade-up">Licencia</h1>
-    <p class="page-sub fade-up">Acceso completo a GASIFAC para tu negocio.</p>
+    <h1 class="page-title fade-up">Gasifac</h1>
+    <p class="page-sub fade-up">Visor y exportador de CFDI. Procesamiento masivo de facturas.</p>
+    <p class="page-sub fade-up" style="font-size:0.8rem; color: var(--text-muted);">CFDI 3.3 y 4.0 · Linux, macOS, Windows</p>
 
     <div class="plan-card fade-up">
-      <div class="plan-name">Plan Mensual</div>
-      <div class="plan-price">$800 <span>MXN</span></div>
-      <div class="plan-period">por mes, por licencia</div>
+      <i class="fa-solid fa-file-invoice plan-icon"></i>
+      <div class="plan-name">Suscripcion Mensual</div>
+      <div class="plan-price">$1,000 <span>MXN</span></div>
+      <div class="plan-period">por mes, por equipo</div>
 
       <ul class="plan-features">
-        <li><i class="fa-solid fa-check"></i> Datos actualizados semanalmente</li>
-        <li><i class="fa-solid fa-check"></i> Precios por municipio y estado</li>
-        <li><i class="fa-solid fa-check"></i> Widget embeddable para tu sitio</li>
-        <li><i class="fa-solid fa-check"></i> Soporte técnico por email</li>
-        <li><i class="fa-solid fa-check"></i> Cancela cuando quieras</li>
+        <li><i class="fa-solid fa-check"></i> Visor de CFDI con tarjetas</li>
+        <li><i class="fa-solid fa-check"></i> Exportacion a CSV, XLSX, XLS, PDF</li>
+        <li><i class="fa-solid fa-check"></i> Filtros por UUID, RFC, Permiso</li>
+        <li><i class="fa-solid fa-check"></i> Exportacion especializada para gas</li>
+        <li><i class="fa-solid fa-check"></i> Power Query avanzado</li>
+        <li><i class="fa-solid fa-check"></i> Monitoreo en vivo de carpetas</li>
+        <li><i class="fa-solid fa-check"></i> Soporte tecnico prioritario</li>
       </ul>
+
+      <div class="form-group">
+        <label for="emailInput">Correo electronico</label>
+        <input type="email" id="emailInput" placeholder="tu@correo.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label for="machineInput">Machine ID</label>
+        <input type="text" id="machineInput" placeholder="Abre Gasifac > Ayuda > Licencia > Copiar Machine ID" />
+        <div class="form-hint">Abre Gasifac, ve a Ayuda &gt; Licencia y copia tu Machine ID.</div>
+      </div>
 
       <button class="btn btn-primary plan-btn" id="checkoutBtn">
         <i class="fa-solid fa-lock" style="margin-right:6px;"></i> Suscribirme
@@ -77,28 +129,67 @@
     </div>
   </main>
 
+  <div class="toast" id="toast"></div>
+
   <script src="components.js"></script>
-  <script>injectNavbar("comprar"); injectFooter();</script>
+  <script>injectNavbar("comprar"); injectMarquee(); injectFooter();</script>
   <script>
+    var toast = document.getElementById("toast");
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(function() { toast.classList.remove("show"); }, 4000);
+    }
+
+    var params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true") {
+      showToast("Pago exitoso. Recibiras tu licencia por correo en unos minutos.");
+      document.querySelector(".plan-card").innerHTML =
+        '<i class="fa-solid fa-circle-check" style="font-size:3rem;color:#4caf50;margin-bottom:16px;display:block;"></i>' +
+        '<h2 style="margin-bottom:8px;">Pago exitoso</h2>' +
+        '<p style="color:var(--text-sec);font-size:0.9rem;">Gracias por tu compra. Recibiras tu licencia y el enlace de descarga de Gasifac en tu correo electronico.</p>' +
+        '<p style="color:var(--text-muted);font-size:0.8rem;margin-top:16px;">Si no recibes el correo en 10 minutos, contacta a soporte@neokey.dev</p>';
+    } else if (params.get("cancelled") === "true") {
+      showToast("Pago cancelado. Puedes intentarlo de nuevo cuando quieras.");
+    }
+
     document.getElementById("checkoutBtn").addEventListener("click", function() {
-      var email = prompt("Ingresa tu email para continuar:");
-      if (!email) return;
+      var email = document.getElementById("emailInput").value.trim();
+      var machineId = document.getElementById("machineInput").value.trim();
+
+      if (!email) {
+        showToast("Ingresa tu correo electronico.");
+        return;
+      }
+      if (!machineId) {
+        showToast("Ingresa tu Machine ID. Abre Gasifac > Ayuda > Licencia > Copiar Machine ID");
+        return;
+      }
+
+      var btn = document.getElementById("checkoutBtn");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:6px;"></i> Redirigiendo...';
 
       fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email })
+        body: JSON.stringify({ email: email, machine_id: machineId })
       })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        if (data.url) {
-          window.location.href = data.url;
+        if (data.checkout_url) {
+          window.location.href = data.checkout_url;
         } else {
-          alert("Error: " + (data.detail || "No se pudo crear la sesión de pago."));
+          showToast("Error: " + (data.detail || "No se pudo crear la sesion de pago."));
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-lock" style="margin-right:6px;"></i> Suscribirme';
         }
       })
       .catch(function() {
-        alert("Error de conexión. Intenta de nuevo.");
+        showToast("Error de conexion. Intenta de nuevo.");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-lock" style="margin-right:6px;"></i> Suscribirme';
       });
     });
   </script>

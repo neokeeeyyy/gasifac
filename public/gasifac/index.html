@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GASIFAC — Precios de gas LP en México</title>
-  <meta name="description" content="Consulta los precios máximos de gas LP por municipio en México. Datos oficiales de la CRE, actualizados semanalmente." />
+  <title>Gasifac — Visor y exportador de CFDI</title>
+  <meta name="description" content="Gasifac: visor y exportador de CFDIs. Procesamiento masivo de facturas, exportacion a CSV/XLSX/PDF. Precios de gas LP por municipio." />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="common.css" />
   <style>
@@ -47,44 +47,32 @@
       justify-content: center;
       gap: 14px;
     }
-    .platform-grid {
+    .features-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 20px;
-      max-width: 700px;
+      max-width: 900px;
       margin: 0 auto;
     }
-    .platform-card {
+    .feature-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 32px 20px;
+      padding: 28px 20px;
       text-align: center;
       transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
-    .platform-card:hover {
+    .feature-card:hover {
       border-color: var(--accent);
       transform: translateY(-4px);
       box-shadow: 0 10px 24px rgba(0,0,0,0.06);
     }
-    .platform-card i {
-      font-size: 2.4rem;
-      color: var(--text-sec);
-      margin-bottom: 14px;
-    }
-    .platform-card:hover i { color: var(--text); }
-    .platform-card .platform-name {
-      font-size: 0.95rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-    }
+    .feature-card i { font-size: 1.8rem; color: var(--text-sec); margin-bottom: 12px; }
+    .feature-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+    .feature-card p { font-size: 0.8rem; color: var(--text-muted); }
     @media (max-width: 768px) {
       .cta-row { flex-direction: column; align-items: center; }
       .cta-row .btn { width: 100%; max-width: 280px; text-align: center; }
-      .platform-grid { grid-template-columns: 1fr; max-width: 280px; }
     }
   </style>
 </head>
@@ -94,40 +82,58 @@
     <section class="hero" id="inicio">
       <div class="hero-badge fade-up">
         <i class="fa-solid fa-bolt"></i>
-        Actualizado semanalmente
+        Procesamiento masivo de CFDI
       </div>
-      <h1 class="hero-title fade-up">Consulta los precios<br>máximos de gas LP</h1>
-      <p class="hero-sub fade-up">Datos oficiales de la CRE por municipio, actualizados cada semana.</p>
+      <h1 class="hero-title fade-up">Procesa tus CFDIs<br>a la velocidad de la luz</h1>
+      <p class="hero-sub fade-up">Visor, exportador y clasificador de CFDIs v3.3 y 4.0. Datos semanales de gas LP. Linux, macOS y Windows.</p>
       <div class="cta-row fade-up">
-        <a href="/gasifac/herramientas" class="btn btn-primary">Consultar Precios</a>
-        <a href="/gasifac/nosotros" class="btn btn-outline">Conocer Más</a>
+        <a href="/gasifac/comprar" class="btn btn-primary">Comprar</a>
+        <a href="/gasifac/herramientas" class="btn btn-outline">Consultar precios de gas</a>
       </div>
     </section>
 
-    <div class="divider" id="plataformas">
+    <div class="divider" id="features">
       <div class="divider-line"></div>
-      <h2 class="divider-label">Plataformas</h2>
+      <h2 class="divider-label">Que incluye</h2>
     </div>
 
     <section class="fade-up" style="padding-bottom:80px;">
-      <div class="platform-grid">
-        <div class="platform-card">
-          <i class="fa-brands fa-linux"></i>
-          <span class="platform-name">Linux</span>
+      <div class="features-grid">
+        <div class="feature-card">
+          <i class="fa-solid fa-file-invoice"></i>
+          <h3>Visor de CFDI</h3>
+          <p>Abre carpetas de XML y visualiza su contenido en tarjetas.</p>
         </div>
-        <div class="platform-card">
-          <i class="fa-brands fa-apple"></i>
-          <span class="platform-name">macOS</span>
+        <div class="feature-card">
+          <i class="fa-solid fa-file-export"></i>
+          <h3>Exportacion</h3>
+          <p>A CSV, XLSX, XLS y PDF con columnas seleccionables.</p>
         </div>
-        <div class="platform-card">
-          <i class="fa-brands fa-windows"></i>
-          <span class="platform-name">Windows</span>
+        <div class="feature-card">
+          <i class="fa-solid fa-filter"></i>
+          <h3>Filtros</h3>
+          <p>Busqueda por UUID, RFC, Permiso y Power Query avanzado.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fa-solid fa-gas-pump"></i>
+          <h3>Gas LP</h3>
+          <p>Precios semanales de la CRE por municipio.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fa-solid fa-eye"></i>
+          <h3>Monitoreo en vivo</h3>
+          <p>Deteccion automatica de nuevos XML en carpetas.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fa-solid fa-shield"></i>
+          <h3>Licencia RSA</h3>
+          <p>Licencia firmada criptograficamente por equipo.</p>
         </div>
       </div>
     </section>
   </main>
 
   <script src="components.js"></script>
-  <script>injectNavbar("inicio"); injectFooter();</script>
+  <script>injectNavbar("inicio"); injectMarquee(); injectFooter();</script>
 </body>
 </html>
