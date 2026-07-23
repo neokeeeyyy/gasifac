@@ -1,12 +1,13 @@
 from datetime import date, datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.models import Municipio, Precio, ProcesamientoEstado
 from api.services.pdf_fetcher import download_from_storage, fetch_pdf
 from api.services.pdf_parser import parse_pdf
+from api.services.geocoder import geocode_municipio
 
 BATCH_SIZE = 15
 
@@ -134,6 +135,8 @@ async def _insert_rows(db: AsyncSession, rows, periodo_inicio: str, periodo_fin:
         )
         mun_map = {(r[0], r[1]): r[2] for r in existing.all()}
 
+        await _geocode_new(db, [m for m in new_muns])
+
     precio_rows = []
     seen = set()
     for row in rows:
@@ -158,3 +161,23 @@ async def _insert_rows(db: AsyncSession, rows, periodo_inicio: str, periodo_fin:
         await db.execute(stmt)
 
     return len(precio_rows)
+
+
+async def _geocode_new(db: AsyncSession, new_muns: list[dict]) -> None:
+    for mun in new_muns:
+        geo = await geocode_municipio(mun["municipio"], mun["estado"])
+        if geo:
+            existing = await db.execute(
+                select(Municipio.id).where(
+                    Municipio.estado == mun["estado"],
+                    Municipio.municipio == mun["municipio"],
+                )
+            )
+            row = existing.first()
+            if row:
+                await db.execute(
+                    update(Municipio)
+                    .where(Municipio.id == row[0])
+                    .values(latitud=geo["lat"], longitud=geo["lng"])
+                )
+        await asyncio.sleep(1.1)
