@@ -36,7 +36,7 @@ class Municipio(Base):
     longitud = Column(Numeric(10, 6))
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    precios = relationship("Precio", back_populates="municipio", cascade="all, delete-orphan")
+    precios = relationship("Precio", back_populates="municipio", cascade="all, delete-orphan", foreign_keys="[Precio.municipio_id]")
 
 
 class Precio(Base):
@@ -99,8 +99,8 @@ class Usuario(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    suscripciones = relationship("Suscripcion", back_populates="usuario", cascade="all, delete-orphan")
-    pagos = relationship("Pago", back_populates="usuario", cascade="all, delete-orphan")
+    suscripciones = relationship("Suscripcion", back_populates="usuario", cascade="all, delete-orphan", foreign_keys="[Suscripcion.usuario_id]")
+    pagos = relationship("Pago", back_populates="usuario", cascade="all, delete-orphan", foreign_keys="[Pago.usuario_id]")
 
 
 class Suscripcion(Base):
