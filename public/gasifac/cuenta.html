@@ -203,7 +203,7 @@
 
       var { error } = await supabase.auth.signInWithOtp({
         email: email,
-        options: { emailRedirectTo: window.location.origin + "/gasifac/cuenta" }
+        options: { emailRedirectTo: "https://neokey.dev/gasifac/cuenta" }
       });
 
       if (error) {
