@@ -50,6 +50,21 @@ class CheckoutResponse(BaseModel):
     checkout_url: str
 
 
+class SugerenciaRequest(BaseModel):
+    name: str
+    email: EmailStr
+    category: str
+    message: str
+
+
+class UsuarioOut(BaseModel):
+    email: str
+    plan: str
+    created_at: Optional[str] = None
+    subscription_status: Optional[str] = None
+    payments_count: int = 0
+
+
 class HealthOut(BaseModel):
     status: str
     version: str

@@ -12,6 +12,7 @@ class Settings:
     STRIPE_PRICE_ID: str = os.environ.get("STRIPE_PRICE_ID", "")
     CRON_SECRET: str = os.environ.get("CRON_SECRET", "")
     GASIFAC_PRIVATE_KEY: str = os.environ.get("GASIFAC_PRIVATE_KEY", "")
+    RESEND_API_KEY: str = os.environ.get("RESEND_API_KEY", "")
 
 
 @lru_cache

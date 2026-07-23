@@ -2,9 +2,11 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.routers.auth import router as auth_router
 from api.routers.precios import router as gas_router
 from api.routers.stats import router as stats_router
 from api.routers.stripe_checkout import router as stripe_router
+from api.routers.sugerencias import router as sugerencias_router
 
 app = FastAPI(title="Gasifac API", version="2.0.0")
 
@@ -16,9 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
 app.include_router(gas_router)
 app.include_router(stats_router)
 app.include_router(stripe_router)
+app.include_router(sugerencias_router)
 
 
 @app.get("/api/health")

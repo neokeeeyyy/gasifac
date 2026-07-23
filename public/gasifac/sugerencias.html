@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sugerencias - GASIFAC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/gasifac/common.css" />
+  <style>
+    .main { flex: 1; max-width: 600px; width: 100%; margin: 0 auto; padding: 60px 24px 80px; }
+    .page-title { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+    .page-sub { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 40px; }
+    .form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+    }
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sec);
+      margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--text); }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .submit-btn { width: 100%; margin-top: 8px; }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #171717;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; }
+    .success-state { display: none; text-align: center; padding: 40px 0; }
+    .success-state i { font-size: 3rem; color: #4caf50; margin-bottom: 16px; display: block; }
+    .success-state h2 { margin-bottom: 8px; }
+    .success-state p { color: var(--text-sec); font-size: 0.9rem; }
+    @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <main class="main">
+    <h1 class="page-title fade-up">Sugerencias</h1>
+    <p class="page-sub fade-up">Cuéntanos qué te gustaría ver o mejorar en Gasifac.</p>
+
+    <div class="form-card fade-up" id="formCard">
+      <form id="suggestionForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nameInput">Nombre</label>
+            <input type="text" id="nameInput" placeholder="Tu nombre" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="emailInput">Correo</label>
+            <input type="email" id="emailInput" placeholder="tu@correo.com" autocomplete="email" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="categoryInput">Categoría</label>
+          <select id="categoryInput">
+            <option value="">Selecciona una categoría</option>
+            <option value="bug">Error / Bug</option>
+            <option value="feature">Nueva funcionalidad</option>
+            <option value="mejora">Mejora existente</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="messageInput">Mensaje</label>
+          <textarea id="messageInput" placeholder="Describe tu sugerencia, problema o idea..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary submit-btn" id="submitBtn">
+          <i class="fa-solid fa-paper-plane" style="margin-right:6px;"></i> Enviar sugerencia
+        </button>
+      </form>
+    </div>
+
+    <div class="success-state" id="successState">
+      <i class="fa-solid fa-circle-check"></i>
+      <h2>Sugerencia enviada</h2>
+      <p>Gracias por tu aporte. Lo revisaremos lo antes posible.</p>
+      <a href="/gasifac/sugerencias" class="btn btn-outline" style="margin-top:24px;">Enviar otra</a>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/gasifac/components.js"></script>
+  <script>injectNavbar("sugerencias"); injectMarquee(); injectFooter();</script>
+  <script>
+    var toast = document.getElementById("toast");
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(function() { toast.classList.remove("show"); }, 4000);
+    }
+
+    document.getElementById("suggestionForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      var name = document.getElementById("nameInput").value.trim();
+      var email = document.getElementById("emailInput").value.trim();
+      var category = document.getElementById("categoryInput").value;
+      var message = document.getElementById("messageInput").value.trim();
+
+      if (!name) { showToast("Ingresa tu nombre."); return; }
+      if (!email) { showToast("Ingresa tu correo electrónico."); return; }
+      if (!category) { showToast("Selecciona una categoría."); return; }
+      if (!message) { showToast("Escribe tu mensaje."); return; }
+
+      var btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:6px;"></i> Enviando...';
+
+      fetch("/api/v1/sugerencias", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, email: email, category: category, message: message })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) {
+          document.getElementById("formCard").style.display = "none";
+          document.getElementById("successState").style.display = "block";
+        } else {
+          showToast("Error: " + (data.detail || "No se pudo enviar."));
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane" style="margin-right:6px;"></i> Enviar sugerencia';
+        }
+      })
+      .catch(function() {
+        showToast("Error de conexión. Intenta de nuevo.");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane" style="margin-right:6px;"></i> Enviar sugerencia';
+      });
+    });
+  </script>
+</body>
+</html>

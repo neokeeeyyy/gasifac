@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Preguntas Frecuentes - GASIFAC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/gasifac/common.css" />
+  <style>
+    .main { flex: 1; max-width: 760px; width: 100%; margin: 0 auto; padding: 60px 24px 80px; }
+    .page-title { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+    .page-sub { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 40px; }
+    .accordion { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .accordion-item { border-bottom: 1px solid var(--border); }
+    .accordion-item:last-child { border-bottom: none; }
+    .accordion-trigger {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 20px;
+      background: var(--bg-card);
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: background 0.2s;
+    }
+    .accordion-trigger:hover { background: var(--bg-alt); }
+    .accordion-trigger i {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: transform 0.25s ease;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+    .accordion-item.open .accordion-trigger i { transform: rotate(180deg); }
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .accordion-body-inner {
+      padding: 0 20px 18px;
+      font-size: 0.88rem;
+      color: var(--text-sec);
+      line-height: 1.8;
+    }
+    .accordion-body-inner a {
+      color: var(--text);
+      font-weight: 600;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="main">
+    <h1 class="page-title fade-up">Preguntas Frecuentes</h1>
+    <p class="page-sub fade-up">Resolvemos tus dudas sobre Gasifac y los precios de gas LP.</p>
+
+    <div class="accordion fade-up" id="faqAccordion">
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          ¿Qué es Gasifac?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Gasifac es un visor y exportador de Comprobantes Fiscales Digitales (CFDI v3.3 y v4.0). Permite abrir carpetas con archivos XML, visualizar su contenido, filtrar por UUID, RFC, Permiso y otros criterios, y exportar a CSV, XLSX, XLS y PDF. Incluye clasificación especializada para el sector gasero.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          ¿Qué son los precios de gas LP que aparecen en la herramienta?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Son los precios máximos al público de gas licuado de petróleo publicados por la Comisión Reguladora de Energía (CRE). Se actualizan semanalmente y cubren todos los municipios de México. Puedes consultarlos gratis en la sección <a href="/gasifac/herramientas">Herramientas</a>.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          ¿Cómo funciona la suscripción?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            La suscripción es de $1,000 MXN mensuales por equipo. Al suscribirte recibes una licencia que activa todas las funciones de Gasifac. El pago se procesa de forma segura a través de Stripe. Puedes cancelar en cualquier momento.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          ¿Qué es el Machine ID y cómo lo obtengo?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            El Machine ID es un identificador único de tu equipo. Para obtenerlo, abre Gasifac, ve a <strong>Ayuda &gt; Licencia</strong> y haz clic en <strong>Copiar Machine ID</strong>. Lo necesitas al momento de comprar tu suscripción.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          ¿Cómo activo mi licencia?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Después de completar el pago, recibirás tu licencia por correo electrónico. Abre Gasifac, ve a <strong>Ayuda &gt; Licencia</strong> y pega el código de licencia. Tu equipo quedará activado automáticamente.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          ¿En qué plataformas funciona Gasifac?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Gasifac está disponible para <strong>Linux</strong>, <strong>macOS</strong> y <strong>Windows</strong>. Se distribuye como archivo ejecutable empaquetado con PyInstaller, sin necesidad de instalar Python.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          ¿Puedo probar Gasifac antes de comprar?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Sí. Puedes descargar Gasifac y usarlo sin licencia para evaluarlo. La versión sin licencia tiene acceso a funciones básicas de visualización. La suscripción desbloquea exportaciones, filtros avanzados y soporte prioritario.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          ¿Cómo contacto al soporte técnico?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Puedes escribirnos a <a href="mailto:soporte@neokey.dev">soporte@neokey.dev</a> con tu nombre, email de registro y una descripción del problema. También puedes visitar nuestra página de <a href="/gasifac/soporte">Soporte</a>. Respondemos en un máximo de 24 horas hábiles.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/gasifac/components.js"></script>
+  <script>injectNavbar("faq"); injectMarquee(); injectFooter();</script>
+  <script>
+    document.querySelectorAll(".accordion-trigger").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var item = btn.parentElement;
+        var body = item.querySelector(".accordion-body");
+        var isOpen = item.classList.contains("open");
+
+        document.querySelectorAll(".accordion-item.open").forEach(function(openItem) {
+          openItem.classList.remove("open");
+          openItem.querySelector(".accordion-body").style.maxHeight = null;
+        });
+
+        if (!isOpen) {
+          item.classList.add("open");
+          body.style.maxHeight = body.scrollHeight + "px";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
