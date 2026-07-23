@@ -47,7 +47,7 @@ class Precio(Base):
     )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    municipio_id = Column(Integer, ForeignKey("gasifac.municipios.id", ondelete="CASCADE"), nullable=False)
+    municipio_id = Column(Integer, ForeignKey("gas_lp.municipios.id", ondelete="CASCADE"), nullable=False)
     precio_kg = Column(Numeric(6, 2), nullable=False)
     precio_litro = Column(Numeric(6, 2), nullable=False)
     fecha_inicio = Column(Date, nullable=False)
@@ -108,7 +108,7 @@ class Suscripcion(Base):
     __table_args__ = {"schema": "landing"}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    usuario_id = Column(UUID(as_uuid=True), ForeignKey("gasifac.usuarios.id", ondelete="CASCADE"), nullable=False)
+    usuario_id = Column(UUID(as_uuid=True), ForeignKey("gas_lp.usuarios.id", ondelete="CASCADE"), nullable=False)
     stripe_subscription_id = Column(String(255), unique=True)
     stripe_price_id = Column(String(255))
     status = Column(String(50), nullable=False)
@@ -125,7 +125,7 @@ class Pago(Base):
     __table_args__ = {"schema": "landing"}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    usuario_id = Column(UUID(as_uuid=True), ForeignKey("gasifac.usuarios.id", ondelete="CASCADE"), nullable=False)
+    usuario_id = Column(UUID(as_uuid=True), ForeignKey("gas_lp.usuarios.id", ondelete="CASCADE"), nullable=False)
     stripe_payment_intent_id = Column(String(255), unique=True)
     stripe_invoice_id = Column(String(255))
     monto_cents = Column(Integer, nullable=False)
