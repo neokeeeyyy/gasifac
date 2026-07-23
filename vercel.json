@@ -1,5 +1,13 @@
 {
+  "builds": [
+    { "src": "api/index.py", "use": "@vercel/python" },
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/index.py" }
+    { "src": "/api/(.*)", "dest": "/api/index.py" },
+    { "src": "/gasifac/?$", "dest": "/public/gasifac/index.html" },
+    { "src": "/gasifac/(herramientas|nosotros|comprar|soporte)$", "dest": "/public/gasifac/$1.html" },
+    { "src": "/gasifac/(.*)", "dest": "/public/gasifac/$1" },
+    { "src": "/(.*)", "dest": "/api/index.py" }
   ]
 }
