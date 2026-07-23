@@ -3,10 +3,8 @@
     { "src": "api/index.py", "use": "@vercel/python" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/gasifac/(herramientas|nosotros|comprar|soporte)$", "dest": "/gasifac/$1.html" },
-    { "src": "/gasifac/?$", "dest": "/gasifac/index.html" },
-    { "src": "/api/(.*)", "dest": "/api/index.py" }
+  "rewrites": [
+    { "source": "/gasifac/(herramientas|nosotros|comprar|soporte)", "destination": "/gasifac/$1.html" },
+    { "source": "/api/(.*)", "destination": "/api/index.py" }
   ]
 }
