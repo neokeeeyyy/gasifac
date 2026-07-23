@@ -59,7 +59,13 @@ function injectMarquee() {
 }
 
 function loadMarqueePrices() {
-  if (!navigator.geolocation) return;
+  var fallback = function() {
+    fetch("/api/v1/precios-cercanos?lat=19.4324&lng=-99.1229&limit=20")
+      .then(function(r) { return r.json(); })
+      .then(renderMarquee)
+      .catch(function() {});
+  };
+  if (!navigator.geolocation) { fallback(); return; }
   navigator.geolocation.getCurrentPosition(function(pos) {
     var lat = pos.coords.latitude;
     var lng = pos.coords.longitude;
@@ -67,7 +73,7 @@ function loadMarqueePrices() {
       .then(function(r) { return r.json(); })
       .then(renderMarquee)
       .catch(function() {});
-  }, function() {}, { timeout: 5000, enableHighAccuracy: false });
+  }, fallback, { timeout: 5000, enableHighAccuracy: false });
 }
 
 function renderMarquee(data) {

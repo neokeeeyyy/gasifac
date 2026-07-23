@@ -168,10 +168,15 @@
       document.getElementById(id).style.display = "block";
     }
 
-    var configRes = await fetch("/api/v1/config");
-    var config = await configRes.json();
-
-    var supabase = createClient(config.supabase_url, config.supabase_anon_key);
+    var supabase;
+    try {
+      var configRes = await fetch("/api/v1/config");
+      var config = await configRes.json();
+      supabase = createClient(config.supabase_url, config.supabase_anon_key);
+    } catch (e) {
+      show("errorState");
+      return;
+    }
 
     var hash = window.location.hash;
     if (hash && hash.includes("access_token")) {
@@ -257,14 +262,14 @@
         document.getElementById("detailPayments").textContent = data.payments_count !== undefined ? data.payments_count : "—";
 
         if (data.subscription_status) {
-          var statusText = data.subscription_status === "active" ? "Activa" : data.subscription_status === "canceled" ? "Cancelada" : data.subscription_status;
-          document.getElementById("detailStatus").textContent = statusText;
+          var statusMap = { active: "Activa", canceled: "Cancelada", past_due: "Pago vencido", trialing: "Periodo de prueba", unpaid: "Sin pago", incomplete_expired: "Expirada" };
+          document.getElementById("detailStatus").textContent = statusMap[data.subscription_status] || data.subscription_status;
         } else {
           document.getElementById("detailStatus").textContent = "Sin suscripción activa";
         }
       } catch (e) {
         document.getElementById("detailPlan").textContent = "-";
-        document.getElementById("detailStatus").textContent = "-";
+        document.getElementById("detailStatus").textContent = "Error al cargar datos";
         document.getElementById("detailSince").textContent = "-";
         document.getElementById("detailPayments").textContent = "-";
       }
