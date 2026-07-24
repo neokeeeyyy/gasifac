@@ -39,47 +39,47 @@ class RateLimiter:
 
 async def geocode_one(client: httpx.AsyncClient, limiter: RateLimiter, mun: tuple, stats: dict):
     municipio, estado, mun_id = mun
-    async with limiter:
-        for attempt in range(MAX_RETRIES):
-            try:
-                resp = await client.get(
-                    NOMINATIM_URL,
-                    params={"q": f"{municipio}, {estado}, Mexico", "format": "json", "limit": 1, "countrycodes": "mx"},
-                )
-                if resp.status_code == 429:
-                    delay = 3 * (attempt + 1)
-                    await asyncio.sleep(delay)
-                    continue
-                if resp.status_code >= 500:
-                    await asyncio.sleep(2 * (attempt + 1))
-                    continue
-                if resp.status_code != 200:
-                    stats["not_found"] += 1
-                    stats["total"] += 1
-                    return
-                data = resp.json()
-                if not data:
-                    stats["not_found"] += 1
-                    stats["total"] += 1
-                    return
-                lat, lng = float(data[0]["lat"]), float(data[0]["lon"])
-                async with stats["db_factory"]() as db:
-                    await db.execute(
-                        update(Municipio).where(Municipio.id == mun_id).values(latitud=lat, longitud=lng)
-                    )
-                    await db.commit()
-                stats["updated"] += 1
+    await limiter.acquire()
+    for attempt in range(MAX_RETRIES):
+        try:
+            resp = await client.get(
+                NOMINATIM_URL,
+                params={"q": f"{municipio}, {estado}, Mexico", "format": "json", "limit": 1, "countrycodes": "mx"},
+            )
+            if resp.status_code == 429:
+                delay = 3 * (attempt + 1)
+                await asyncio.sleep(delay)
+                continue
+            if resp.status_code >= 500:
+                await asyncio.sleep(2 * (attempt + 1))
+                continue
+            if resp.status_code != 200:
+                stats["not_found"] += 1
                 stats["total"] += 1
-                if stats["total"] % 25 == 0:
-                    print(f"  [{stats['total']}/{stats['max']}] {stats['updated']} ok, {stats['not_found']} not found, {stats['failed']} failed")
                 return
-            except Exception:
-                if attempt < MAX_RETRIES - 1:
-                    await asyncio.sleep(2 * (attempt + 1))
+            data = resp.json()
+            if not data:
+                stats["not_found"] += 1
+                stats["total"] += 1
+                return
+            lat, lng = float(data[0]["lat"]), float(data[0]["lon"])
+            async with stats["db_factory"]() as db:
+                await db.execute(
+                    update(Municipio).where(Municipio.id == mun_id).values(latitud=lat, longitud=lng)
+                )
+                await db.commit()
+            stats["updated"] += 1
+            stats["total"] += 1
+            if stats["total"] % 25 == 0:
+                print(f"  [{stats['total']}/{stats['max']}] {stats['updated']} ok, {stats['not_found']} not found, {stats['failed']} failed")
+            return
+        except Exception:
+            if attempt < MAX_RETRIES - 1:
+                await asyncio.sleep(2 * (attempt + 1))
 
-        stats["failed"] += 1
-        stats["total"] += 1
-        print(f"  [{stats['total']}/{stats['max']}] {municipio}, {estado} -> FAILED")
+    stats["failed"] += 1
+    stats["total"] += 1
+    print(f"  [{stats['total']}/{stats['max']}] {municipio}, {estado} -> FAILED")
 
 
 async def geocode_all():
