@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-import time
 from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
@@ -16,49 +15,29 @@ from api.models import Municipio
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 USER_AGENT = "GasifacBot/1.0 (https://neokey.dev)"
-MAX_RETRIES = 3
-CONCURRENCY = 15
-
-PROXY_SOURCES = [
-    "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=5000&country=mx",
-    "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=5000&country=all",
-    "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt",
-]
+TOR_PROXY = "socks5://127.0.0.1:9050"
+MAX_RETRIES = 4
+CONCURRENCY = 10
+REQUEST_DELAY = 0.15
 
 
-async def fetch_proxies() -> list[str]:
-    proxies = set()
-    async with httpx.AsyncClient(timeout=10) as client:
-        for url in PROXY_SOURCES:
-            try:
-                resp = await client.get(url, headers={"User-Agent": USER_AGENT})
-                if resp.status_code == 200:
-                    for line in resp.text.strip().splitlines():
-                        line = line.strip()
-                        if line and ":" in line and not line.startswith("#"):
-                            proxies.add(f"http://{line}")
-            except Exception:
-                continue
-    return list(proxies)
+class RateLimiter:
+    def __init__(self, interval: float):
+        self.interval = interval
+        self._lock = asyncio.Lock()
+        self._last = 0.0
+
+    async def acquire(self):
+        async with self._lock:
+            import time
+            now = time.monotonic()
+            wait = self.interval - (now - self._last)
+            if wait > 0:
+                await asyncio.sleep(wait)
+            self._last = time.monotonic()
 
 
-async def test_proxy(client: httpx.AsyncClient, proxy: str, semaphore: asyncio.Semaphore) -> str | None:
-    async with semaphore:
-        try:
-            resp = await client.get(
-                NOMINATIM_URL,
-                params={"q": "Mexico City, Mexico", "format": "json", "limit": 1},
-                proxy=proxy,
-                timeout=8,
-            )
-            if resp.status_code == 200:
-                return proxy
-        except Exception:
-            pass
-    return None
-
-
-async def geocode_one(client: httpx.AsyncClient, proxy: str, mun: tuple, limiter: asyncio.Semaphore, stats: dict):
+async def geocode_one(client: httpx.AsyncClient, limiter: RateLimiter, mun: tuple, stats: dict):
     municipio, estado, mun_id = mun
     async with limiter:
         for attempt in range(MAX_RETRIES):
@@ -66,15 +45,13 @@ async def geocode_one(client: httpx.AsyncClient, proxy: str, mun: tuple, limiter
                 resp = await client.get(
                     NOMINATIM_URL,
                     params={"q": f"{municipio}, {estado}, Mexico", "format": "json", "limit": 1, "countrycodes": "mx"},
-                    proxy=proxy,
-                    timeout=12,
                 )
                 if resp.status_code == 429:
-                    delay = 2 * (attempt + 1)
+                    delay = 3 * (attempt + 1)
                     await asyncio.sleep(delay)
                     continue
                 if resp.status_code >= 500:
-                    await asyncio.sleep(1.5 * (attempt + 1))
+                    await asyncio.sleep(2 * (attempt + 1))
                     continue
                 if resp.status_code != 200:
                     stats["not_found"] += 1
@@ -93,15 +70,12 @@ async def geocode_one(client: httpx.AsyncClient, proxy: str, mun: tuple, limiter
                     await db.commit()
                 stats["updated"] += 1
                 stats["total"] += 1
-                if stats["total"] % 20 == 0:
-                    print(f"  [{stats['total']}/{stats['max']}] {stats['updated']} ok, {stats['not_found']} no encontrados, {stats['failed']} fallos")
-                else:
-                    print(f"  [{stats['total']}/{stats['max']}] {municipio}, {estado} -> {lat}, {lng}")
+                if stats["total"] % 25 == 0:
+                    print(f"  [{stats['total']}/{stats['max']}] {stats['updated']} ok, {stats['not_found']} not found, {stats['failed']} failed")
                 return
             except Exception:
                 if attempt < MAX_RETRIES - 1:
-                    await asyncio.sleep(1.5 * (attempt + 1))
-                continue
+                    await asyncio.sleep(2 * (attempt + 1))
 
         stats["failed"] += 1
         stats["total"] += 1
@@ -129,36 +103,18 @@ async def geocode_all():
         return
 
     muns = [(r[2], r[1], r[0]) for r in rows]
-    print(f"Municipios sin coordenadas: {total}")
-    print("Buscando proxies...")
-    all_proxies = await fetch_proxies()
-    print(f"Proxies encontrados: {len(all_proxies)}")
+    print(f"Municipios sin coordenadas: {total} (via Tor, {CONCURRENCY} parallel)")
 
-    if not all_proxies:
-        print("No se encontraron proxies. Usando conexion directa...")
-        all_proxies = [None]
+    limiter = RateLimiter(REQUEST_DELAY)
+    stats = {"updated": 0, "not_found": 0, "failed": 0, "total": 0, "max": total, "db_factory": session_factory}
 
-    test_sem = asyncio.Semaphore(30)
-    async with httpx.AsyncClient(timeout=8, headers={"User-Agent": USER_AGENT}) as client:
-        tasks = [test_proxy(client, p, test_sem) for p in all_proxies]
-        results = await asyncio.gather(*tasks)
-    working = [p for p in results if p]
-    print(f"Proxies funcionales: {len(working)} de {len(all_proxies)}")
-
-    if not working:
-        print("Ningun proxy funciona, usando conexion directa")
-        working = [None]
-
-    proxy_idx = 0
-    limiter = asyncio.Semaphore(CONCURRENCY)
-    stats = {"updated": 0, "not_found": 0, "failed": 0, "retries": 0, "total": 0, "max": total, "db_factory": session_factory}
-
-    async with httpx.AsyncClient(timeout=15, headers={"User-Agent": USER_AGENT}) as client:
-        tasks = []
-        for mun in muns:
-            proxy = working[proxy_idx % len(working)]
-            proxy_idx += 1
-            tasks.append(geocode_one(client, proxy, mun, limiter, stats))
+    async with httpx.AsyncClient(
+        proxy=TOR_PROXY,
+        timeout=20,
+        headers={"User-Agent": USER_AGENT},
+        limits=httpx.Limits(max_connections=CONCURRENCY + 5, max_keepalive_connections=CONCURRENCY),
+    ) as client:
+        tasks = [geocode_one(client, limiter, mun, stats) for mun in muns]
         await asyncio.gather(*tasks)
 
     print(f"\nFinalizado: {stats['updated']} actualizados, {stats['not_found']} no encontrados, {stats['failed']} fallos")
