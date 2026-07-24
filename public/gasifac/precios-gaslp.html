@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Precios de gas LP - GASIFAC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/gasifac/common.css" />
+  <style>
+    .main { flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 40px 24px 60px; }
+    .page-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+    .page-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 32px; }
+
+    .search-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .search-bar input, .search-bar select {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+    .search-bar input:focus, .search-bar select:focus { border-color: var(--text); }
+    .search-bar input[type="text"] { flex: 1; min-width: 200px; }
+    .search-bar select { min-width: 180px; }
+
+    .unit-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .unit-toggle button {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 10px 18px;
+      border: none;
+      background: var(--bg);
+      color: var(--text-sec);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .unit-toggle button.active { background: var(--text); color: var(--bg); }
+    .unit-toggle button:not(.active):hover { background: var(--bg-alt); }
+
+    .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: var(--text-sec); font-size: 0.85rem; }
+    .results-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .results-table thead { background: var(--bg-alt); }
+    .results-table th {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-sec);
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 56px;
+      background: var(--bg-alt);
+      z-index: 10;
+    }
+    .results-table td { font-size: 0.9rem; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+    .results-table tbody tr:hover { background: var(--bg-alt); }
+    .results-table .price-cell { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+    .results-table .municipio-cell { font-weight: 600; }
+    .results-table .estado-cell { color: var(--text-muted); font-size: 0.8rem; }
+    .results-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.9rem; }
+    .results-scroll { overflow-x: auto; }
+
+    .single-result { display: none; }
+    .single-result.active { display: block; }
+    .single-municipio {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .single-estado {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 28px;
+    }
+    .single-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .single-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      padding: 36px 24px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .single-card:hover { transform: translateY(-2px); }
+    .single-card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .single-card-price {
+      font-size: 2.2rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .single-card-unit {
+      font-size: 0.85rem;
+      color: var(--text-sec);
+      margin-top: 6px;
+    }
+
+    @media (max-width: 768px) {
+      .search-bar { flex-direction: column; }
+      .search-bar input[type="text"] { min-width: unset; }
+      .search-bar select { min-width: unset; }
+      .single-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="main">
+    <h1 class="page-title">Precios de gas LP</h1>
+    <p class="page-sub">Busca por municipio o estado. Datos oficiales de la CRE, actualizados semanalmente.</p>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Buscar municipio o estado..." autocomplete="off" />
+      <select id="estadoFilter">
+        <option value="">Todos los estados</option>
+      </select>
+      <div class="unit-toggle">
+        <button class="active" data-unit="kg">/ kg</button>
+        <button data-unit="lt">/ lt</button>
+      </div>
+    </div>
+
+    <div class="single-result" id="singleResult">
+      <div class="single-municipio" id="singleMunicipio"></div>
+      <div class="single-estado" id="singleEstado"></div>
+      <div class="single-cards">
+        <div class="single-card">
+          <div class="single-card-label">Precio por litro</div>
+          <div class="single-card-price" id="singlePriceLt"></div>
+          <div class="single-card-unit">MXN / litro</div>
+        </div>
+        <div class="single-card">
+          <div class="single-card-label">Precio por kg</div>
+          <div class="single-card-price" id="singlePriceKg"></div>
+          <div class="single-card-unit">MXN / kg</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-header" id="resultsHeader" style="display:none;">
+      <span id="resultsCount"></span>
+    </div>
+
+    <div class="results-scroll">
+      <table class="results-table" id="resultsTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>Municipio</th>
+            <th>Estado</th>
+            <th style="text-align:right;">Precio</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+
+    <div class="results-empty" id="resultsEmpty">
+      <i class="fa-solid fa-magnifying-glass" style="font-size:1.4rem;color:var(--border);display:block;margin-bottom:12px;"></i>
+      Escribe el nombre de un municipio o selecciona un estado para comenzar.
+    </div>
+  </main>
+
+  <script src="/gasifac/components.js"></script>
+  <script>injectNavbar("herramientas"); injectMarquee(); injectFooter();</script>
+  <script>
+    var API = "/api/v1";
+    var allPrices = [];
+
+    document.addEventListener("DOMContentLoaded", function() {
+      setupSearch();
+      loadEstados();
+      loadPrices();
+    });
+
+    function setupSearch() {
+      var input = document.getElementById("searchInput");
+      var select = document.getElementById("estadoFilter");
+      var btns = document.querySelectorAll(".unit-toggle button");
+      var debounce;
+      input.addEventListener("input", function() {
+        clearTimeout(debounce);
+        debounce = setTimeout(filterResults, 200);
+      });
+      select.addEventListener("change", filterResults);
+      btns.forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          btns.forEach(function(b) { b.classList.remove("active"); });
+          btn.classList.add("active");
+          filterResults();
+        });
+      });
+    }
+
+    function loadEstados() {
+      fetch(API + "/estados").then(function(r) { return r.json(); }).then(function(estados) {
+        var sel = document.getElementById("estadoFilter");
+        estados.forEach(function(e) {
+          var opt = document.createElement("option");
+          opt.value = e;
+          opt.textContent = e;
+          sel.appendChild(opt);
+        });
+      }).catch(function() {});
+    }
+
+    function loadPrices() {
+      fetch(API + "/precios").then(function(r) { return r.json(); }).then(function(data) {
+        allPrices = data;
+      }).catch(function() {});
+    }
+
+    function filterResults() {
+      var query = document.getElementById("searchInput").value.toLowerCase().trim();
+      var estado = document.getElementById("estadoFilter").value;
+      var table = document.getElementById("resultsTable");
+      var tbody = document.getElementById("resultsBody");
+      var header = document.getElementById("resultsHeader");
+      var countEl = document.getElementById("resultsCount");
+      var empty = document.getElementById("resultsEmpty");
+      var single = document.getElementById("singleResult");
+      var filtered = allPrices;
+
+      if (estado) filtered = filtered.filter(function(p) { return p.estado === estado; });
+      if (query) filtered = filtered.filter(function(p) {
+        return p.municipio_nombre.toLowerCase().indexOf(query) !== -1 || p.estado.toLowerCase().indexOf(query) !== -1;
+      });
+
+      table.style.display = "none";
+      header.style.display = "none";
+      single.classList.remove("active");
+
+      if (filtered.length === 0 && (query || estado)) {
+        empty.style.display = "block";
+        empty.innerHTML = '<i class="fa-solid fa-circle-info" style="font-size:1.2rem;color:var(--border);display:block;margin-bottom:12px;"></i>Sin resultados para esta busqueda.';
+        return;
+      }
+      if (!query && !estado) {
+        empty.style.display = "block";
+        empty.innerHTML = '<i class="fa-solid fa-magnifying-glass" style="font-size:1.4rem;color:var(--border);display:block;margin-bottom:12px;"></i>Escribe el nombre de un municipio o selecciona un estado para comenzar.';
+        return;
+      }
+
+      empty.style.display = "none";
+
+      if (filtered.length === 1) {
+        var p = filtered[0];
+        document.getElementById("singleMunicipio").textContent = p.municipio_nombre;
+        document.getElementById("singleEstado").textContent = p.estado;
+        document.getElementById("singlePriceLt").textContent = "$" + p.precio_litro.toFixed(2);
+        document.getElementById("singlePriceKg").textContent = "$" + p.precio_kg.toFixed(2);
+        single.classList.add("active");
+        return;
+      }
+
+      var unit = document.querySelector(".unit-toggle button.active").dataset.unit;
+      header.style.display = "flex";
+      countEl.textContent = filtered.length + " resultado" + (filtered.length !== 1 ? "s" : "");
+      tbody.innerHTML = "";
+      filtered.forEach(function(p) {
+        var price = unit === "kg" ? p.precio_kg : p.precio_litro;
+        var tr = document.createElement("tr");
+        tr.innerHTML = '<td class="municipio-cell">' + p.municipio_nombre + '</td><td class="estado-cell">' + p.estado + '</td><td class="price-cell">$' + price.toFixed(2) + ' / ' + unit + '</td>';
+        tbody.appendChild(tr);
+      });
+      table.style.display = "table";
+    }
+  </script>
+</body>
+</html>
