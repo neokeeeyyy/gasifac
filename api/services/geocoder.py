@@ -1,4 +1,3 @@
-import asyncio
 import httpx
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
@@ -13,6 +12,10 @@ async def geocode_municipio(municipio: str, estado: str) -> dict | None:
             params={"q": query, "format": "json", "limit": 1, "countrycodes": "mx"},
             headers={"User-Agent": USER_AGENT},
         )
+        if resp.status_code == 429:
+            raise Exception("Rate limited")
+        if resp.status_code >= 500:
+            raise Exception(f"Server error {resp.status_code}")
         if resp.status_code != 200:
             return None
         data = resp.json()
