@@ -14,12 +14,16 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from api.config import settings
 from api.models import Municipio
 
-NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 USER_AGENT = "GasifacBot/1.0 (https://neokey.dev)"
 TOR_PROXY = "socks5://127.0.0.1:9050"
-MAX_RETRIES = 4
-CONCURRENCY = 6
-ROTATE_EVERY = 10
+MAX_RETRIES = 3
+CONCURRENCY = 10
+ROTATE_EVERY = 12
+
+PROVIDERS = [
+    {"name": "nominatim", "url": "https://nominatim.openstreetmap.org/search", "rate": 1.1},
+    {"name": "photon", "url": "https://photon.komoot.io/search", "rate": 0.5},
+]
 
 
 class CircuitRotator:
@@ -31,76 +35,83 @@ class CircuitRotator:
         async with self._lock:
             self._count += 1
             if self._count % ROTATE_EVERY == 0:
-                await self._force_new_circuit()
-
-    async def _force_new_circuit(self):
-        try:
-            from stem.control import Controller
-            with Controller.from_port(port=9051) as controller:
-                controller.authenticate()
-                controller.signal("NEWNYM")
-                await asyncio.sleep(1.5)
-        except Exception:
-            pass
+                try:
+                    from stem.control import Controller
+                    with Controller.from_port(port=9051) as controller:
+                        controller.authenticate()
+                        controller.signal("NEWNYM")
+                        await asyncio.sleep(1.5)
+                except Exception:
+                    pass
 
 
-class RateLimiter:
-    def __init__(self, interval: float):
-        self.interval = interval
-        self._lock = asyncio.Lock()
-        self._last = 0.0
+class ProviderRateLimiter:
+    def __init__(self):
+        self._locks = {p["name"]: asyncio.Lock() for p in PROVIDERS}
+        self._last = {p["name"]: 0.0 for p in PROVIDERS}
 
-    async def acquire(self):
-        async with self._lock:
+    async def acquire(self, provider_name: str, interval: float):
+        async with self._locks[provider_name]:
             now = time.monotonic()
-            wait = self.interval - (now - self._last)
+            wait = interval - (now - self._last[provider_name])
             if wait > 0:
                 await asyncio.sleep(wait)
-            self._last = time.monotonic()
+            self._last[provider_name] = time.monotonic()
 
 
-async def geocode_one(client: httpx.AsyncClient, limiter: RateLimiter, rotator: CircuitRotator, mun: tuple, stats: dict):
+async def try_provider(client: httpx.AsyncClient, provider: dict, municipio: str, estado: str) -> dict | None:
+    params = {"q": f"{municipio}, {estado}, Mexico", "format": "json", "limit": 1, "countrycodes": "mx"}
+    try:
+        resp = await client.get(provider["url"], params=params, timeout=12)
+        if resp.status_code == 429:
+            raise Exception("Rate limited")
+        if resp.status_code >= 500:
+            raise Exception(f"Server {resp.status_code}")
+        if resp.status_code != 200:
+            return None
+        data = resp.json()
+        features = data.get("features", data) if isinstance(data, dict) else data
+        if not features:
+            return None
+        f = features[0]
+        if provider["name"] == "photon":
+            coords = f.get("geometry", {}).get("coordinates", [])
+            if len(coords) >= 2:
+                return {"lat": float(coords[1]), "lng": float(coords[0])}
+        else:
+            if "lat" in f and "lon" in f:
+                return {"lat": float(f["lat"]), "lng": float(f["lon"])}
+        return None
+    except Exception:
+        raise
+
+
+async def geocode_one(client: httpx.AsyncClient, limiter: ProviderRateLimiter, rotator: CircuitRotator, mun: tuple, stats: dict):
     municipio, estado, mun_id = mun
-    await limiter.acquire()
     await rotator.maybe_rotate()
 
     for attempt in range(MAX_RETRIES):
-        try:
-            resp = await client.get(
-                NOMINATIM_URL,
-                params={"q": f"{municipio}, {estado}, Mexico", "format": "json", "limit": 1, "countrycodes": "mx"},
-            )
-            if resp.status_code == 429:
-                delay = 5 * (attempt + 1)
-                await asyncio.sleep(delay)
-                await rotator._force_new_circuit()
+        for provider in PROVIDERS:
+            await limiter.acquire(provider["name"], provider["rate"])
+            try:
+                result = await try_provider(client, provider, municipio, estado)
+                if result:
+                    async with stats["db_factory"]() as db:
+                        await db.execute(
+                            update(Municipio).where(Municipio.id == mun_id).values(latitud=result["lat"], longitud=result["lng"])
+                        )
+                        await db.commit()
+                    stats["updated"] += 1
+                    stats["total"] += 1
+                    if stats["total"] % 25 == 0:
+                        print(f"  [{stats['total']}/{stats['max']}] {stats['updated']} ok, {stats['not_found']} not found, {stats['failed']} failed")
+                    return
+            except Exception:
                 continue
-            if resp.status_code >= 500:
-                await asyncio.sleep(2 * (attempt + 1))
-                continue
-            if resp.status_code != 200:
-                stats["not_found"] += 1
-                stats["total"] += 1
-                return
-            data = resp.json()
-            if not data:
-                stats["not_found"] += 1
-                stats["total"] += 1
-                return
-            lat, lng = float(data[0]["lat"]), float(data[0]["lon"])
-            async with stats["db_factory"]() as db:
-                await db.execute(
-                    update(Municipio).where(Municipio.id == mun_id).values(latitud=lat, longitud=lng)
-                )
-                await db.commit()
-            stats["updated"] += 1
-            stats["total"] += 1
-            if stats["total"] % 25 == 0:
-                print(f"  [{stats['total']}/{stats['max']}] {stats['updated']} ok, {stats['not_found']} not found, {stats['failed']} failed")
-            return
-        except Exception:
-            if attempt < MAX_RETRIES - 1:
-                await asyncio.sleep(2 * (attempt + 1))
+
+        if attempt < MAX_RETRIES - 1:
+            await asyncio.sleep(3 * (attempt + 1))
+            await rotator.maybe_rotate()
 
     stats["failed"] += 1
     stats["total"] += 1
@@ -134,9 +145,10 @@ async def geocode_all():
         return
 
     muns = [(r[2], r[1], r[0]) for r in rows]
-    print(f"Municipios sin coordenadas: {total} (Tor + NEWNYM, {CONCURRENCY} parallel)")
+    print(f"Municipios sin coordenadas: {total}")
+    print(f"Providers: {', '.join(p['name'] for p in PROVIDERS)} (Tor + NEWNYM)")
 
-    limiter = RateLimiter(0.25)
+    limiter = ProviderRateLimiter()
     rotator = CircuitRotator()
     stats = {"updated": 0, "not_found": 0, "failed": 0, "total": 0, "max": total, "db_factory": session_factory, "failed_list": []}
 
@@ -147,30 +159,28 @@ async def geocode_all():
         limits=httpx.Limits(max_connections=CONCURRENCY + 5, max_keepalive_connections=CONCURRENCY),
     ) as client:
 
-        print(f"\n--- Pasada 1 de {len(muns)} ---")
+        print(f"\n--- Pasada 1: {len(muns)} municipios ---")
         await geocode_batch(client, limiter, rotator, muns, stats)
 
         if stats["failed_list"]:
-            failed_round1 = list(stats["failed_list"])
+            failed = list(stats["failed_list"])
             stats["failed_list"] = []
             stats["failed"] = 0
-            failed_count = len(failed_round1)
-            print(f"\n--- Pasada 2: reintentando {failed_count} fallidos (espera 30s) ---")
-            await asyncio.sleep(30)
-            await geocode_batch(client, limiter, rotator, failed_round1, stats)
+            print(f"\n--- Pasada 2: reintentando {len(failed)} fallidos (espera 20s) ---")
+            await asyncio.sleep(20)
+            await geocode_batch(client, limiter, rotator, failed, stats)
 
         if stats["failed_list"]:
-            failed_round2 = list(stats["failed_list"])
+            failed = list(stats["failed_list"])
             stats["failed_list"] = []
             stats["failed"] = 0
-            failed_count = len(failed_round2)
-            print(f"\n--- Pasada 3: reintentando {failed_count} fallidos (espera 60s) ---")
-            await asyncio.sleep(60)
-            await geocode_batch(client, limiter, rotator, failed_round2, stats)
+            print(f"\n--- Pasada 3: reintentando {len(failed)} fallidos (espera 45s) ---")
+            await asyncio.sleep(45)
+            await geocode_batch(client, limiter, rotator, failed, stats)
 
     print(f"\nFinalizado:")
     print(f"  Actualizados: {stats['updated']}")
-    print(f"  No encontrados en Nominatim: {stats['not_found']}")
+    print(f"  No encontrados: {stats['not_found']}")
     print(f"  Fallos definitivos: {len(stats['failed_list'])}")
     if stats["failed_list"]:
         print(f"\nMunicipios que fallaron:")
