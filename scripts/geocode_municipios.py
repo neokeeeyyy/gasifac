@@ -17,16 +17,15 @@ from api.models import Municipio
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 USER_AGENT = "GasifacBot/1.0 (https://neokey.dev)"
 TOR_PROXY = "socks5://127.0.0.1:9050"
-MAX_RETRIES = 3
-CONCURRENCY = 8
-ROTATE_EVERY = 15
+MAX_RETRIES = 4
+CONCURRENCY = 6
+ROTATE_EVERY = 10
 
 
 class CircuitRotator:
     def __init__(self):
         self._lock = asyncio.Lock()
         self._count = 0
-        self._semaphore = asyncio.Semaphore(1)
 
     async def maybe_rotate(self):
         async with self._lock:
@@ -40,7 +39,7 @@ class CircuitRotator:
             with Controller.from_port(port=9051) as controller:
                 controller.authenticate()
                 controller.signal("NEWNYM")
-                await asyncio.sleep(1)
+                await asyncio.sleep(1.5)
         except Exception:
             pass
 
@@ -105,7 +104,13 @@ async def geocode_one(client: httpx.AsyncClient, limiter: RateLimiter, rotator: 
 
     stats["failed"] += 1
     stats["total"] += 1
+    stats.setdefault("failed_list", []).append((municipio, estado, mun_id))
     print(f"  [{stats['total']}/{stats['max']}] {municipio}, {estado} -> FAILED")
+
+
+async def geocode_batch(client, limiter, rotator, muns, stats):
+    tasks = [geocode_one(client, limiter, rotator, mun, stats) for mun in muns]
+    await asyncio.gather(*tasks)
 
 
 async def geocode_all():
@@ -129,11 +134,11 @@ async def geocode_all():
         return
 
     muns = [(r[2], r[1], r[0]) for r in rows]
-    print(f"Municipios sin coordenadas: {total} (Tor + NEWNYM, {CONCURRENCY} parallel, rotate every {ROTATE_EVERY})")
+    print(f"Municipios sin coordenadas: {total} (Tor + NEWNYM, {CONCURRENCY} parallel)")
 
-    limiter = RateLimiter(0.2)
+    limiter = RateLimiter(0.25)
     rotator = CircuitRotator()
-    stats = {"updated": 0, "not_found": 0, "failed": 0, "total": 0, "max": total, "db_factory": session_factory}
+    stats = {"updated": 0, "not_found": 0, "failed": 0, "total": 0, "max": total, "db_factory": session_factory, "failed_list": []}
 
     async with httpx.AsyncClient(
         proxy=TOR_PROXY,
@@ -141,10 +146,37 @@ async def geocode_all():
         headers={"User-Agent": USER_AGENT},
         limits=httpx.Limits(max_connections=CONCURRENCY + 5, max_keepalive_connections=CONCURRENCY),
     ) as client:
-        tasks = [geocode_one(client, limiter, rotator, mun, stats) for mun in muns]
-        await asyncio.gather(*tasks)
 
-    print(f"\nFinalizado: {stats['updated']} actualizados, {stats['not_found']} no encontrados, {stats['failed']} fallos")
+        print(f"\n--- Pasada 1 de {len(muns)} ---")
+        await geocode_batch(client, limiter, rotator, muns, stats)
+
+        if stats["failed_list"]:
+            failed_round1 = list(stats["failed_list"])
+            stats["failed_list"] = []
+            stats["failed"] = 0
+            failed_count = len(failed_round1)
+            print(f"\n--- Pasada 2: reintentando {failed_count} fallidos (espera 30s) ---")
+            await asyncio.sleep(30)
+            await geocode_batch(client, limiter, rotator, failed_round1, stats)
+
+        if stats["failed_list"]:
+            failed_round2 = list(stats["failed_list"])
+            stats["failed_list"] = []
+            stats["failed"] = 0
+            failed_count = len(failed_round2)
+            print(f"\n--- Pasada 3: reintentando {failed_count} fallidos (espera 60s) ---")
+            await asyncio.sleep(60)
+            await geocode_batch(client, limiter, rotator, failed_round2, stats)
+
+    print(f"\nFinalizado:")
+    print(f"  Actualizados: {stats['updated']}")
+    print(f"  No encontrados en Nominatim: {stats['not_found']}")
+    print(f"  Fallos definitivos: {len(stats['failed_list'])}")
+    if stats["failed_list"]:
+        print(f"\nMunicipios que fallaron:")
+        for mun, est, _ in stats["failed_list"]:
+            print(f"  - {mun}, {est}")
+
     await engine.dispose()
 
 
