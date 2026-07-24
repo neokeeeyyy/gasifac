@@ -11,3 +11,4 @@ email-validator
 aiofiles
 resend
 socksio
+stem
