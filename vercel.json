@@ -2,5 +2,11 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.py" }
+  ],
+  "crons": [
+    {
+      "path": "/api/v1/trigger-update",
+      "schedule": "0 6 * * 1"
+    }
   ]
 }

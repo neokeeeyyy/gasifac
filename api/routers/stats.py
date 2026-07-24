@@ -1,6 +1,6 @@
 import os
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,10 +13,14 @@ router = APIRouter(prefix="/api/v1", tags=["gasifac-admin"])
 
 @router.post("/trigger-update")
 async def trigger_update(
-    x_cron_secret: str = Header(...),
+    request: Request,
+    x_cron_secret: str = Header(default=""),
     db: AsyncSession = Depends(get_db),
 ):
-    if x_cron_secret != os.environ.get("CRON_SECRET"):
+    auth_header = request.headers.get("authorization", "")
+    cron_secret = os.environ.get("CRON_SECRET", "")
+    valid = x_cron_secret == cron_secret or auth_header == f"Bearer {cron_secret}"
+    if not valid:
         raise HTTPException(status_code=403, detail="Invalid cron secret")
     result = await run_update(db)
     return result
