@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+import time
 from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
@@ -16,9 +17,32 @@ from api.models import Municipio
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 USER_AGENT = "GasifacBot/1.0 (https://neokey.dev)"
 TOR_PROXY = "socks5://127.0.0.1:9050"
-MAX_RETRIES = 4
-CONCURRENCY = 10
-REQUEST_DELAY = 0.15
+MAX_RETRIES = 3
+CONCURRENCY = 8
+ROTATE_EVERY = 15
+
+
+class CircuitRotator:
+    def __init__(self):
+        self._lock = asyncio.Lock()
+        self._count = 0
+        self._semaphore = asyncio.Semaphore(1)
+
+    async def maybe_rotate(self):
+        async with self._lock:
+            self._count += 1
+            if self._count % ROTATE_EVERY == 0:
+                await self._force_new_circuit()
+
+    async def _force_new_circuit(self):
+        try:
+            from stem.control import Controller
+            with Controller.from_port(port=9051) as controller:
+                controller.authenticate()
+                controller.signal("NEWNYM")
+                await asyncio.sleep(1)
+        except Exception:
+            pass
 
 
 class RateLimiter:
@@ -29,7 +53,6 @@ class RateLimiter:
 
     async def acquire(self):
         async with self._lock:
-            import time
             now = time.monotonic()
             wait = self.interval - (now - self._last)
             if wait > 0:
@@ -37,9 +60,11 @@ class RateLimiter:
             self._last = time.monotonic()
 
 
-async def geocode_one(client: httpx.AsyncClient, limiter: RateLimiter, mun: tuple, stats: dict):
+async def geocode_one(client: httpx.AsyncClient, limiter: RateLimiter, rotator: CircuitRotator, mun: tuple, stats: dict):
     municipio, estado, mun_id = mun
     await limiter.acquire()
+    await rotator.maybe_rotate()
+
     for attempt in range(MAX_RETRIES):
         try:
             resp = await client.get(
@@ -47,8 +72,9 @@ async def geocode_one(client: httpx.AsyncClient, limiter: RateLimiter, mun: tupl
                 params={"q": f"{municipio}, {estado}, Mexico", "format": "json", "limit": 1, "countrycodes": "mx"},
             )
             if resp.status_code == 429:
-                delay = 3 * (attempt + 1)
+                delay = 5 * (attempt + 1)
                 await asyncio.sleep(delay)
+                await rotator._force_new_circuit()
                 continue
             if resp.status_code >= 500:
                 await asyncio.sleep(2 * (attempt + 1))
@@ -103,9 +129,10 @@ async def geocode_all():
         return
 
     muns = [(r[2], r[1], r[0]) for r in rows]
-    print(f"Municipios sin coordenadas: {total} (via Tor, {CONCURRENCY} parallel)")
+    print(f"Municipios sin coordenadas: {total} (Tor + NEWNYM, {CONCURRENCY} parallel, rotate every {ROTATE_EVERY})")
 
-    limiter = RateLimiter(REQUEST_DELAY)
+    limiter = RateLimiter(0.2)
+    rotator = CircuitRotator()
     stats = {"updated": 0, "not_found": 0, "failed": 0, "total": 0, "max": total, "db_factory": session_factory}
 
     async with httpx.AsyncClient(
@@ -114,7 +141,7 @@ async def geocode_all():
         headers={"User-Agent": USER_AGENT},
         limits=httpx.Limits(max_connections=CONCURRENCY + 5, max_keepalive_connections=CONCURRENCY),
     ) as client:
-        tasks = [geocode_one(client, limiter, mun, stats) for mun in muns]
+        tasks = [geocode_one(client, limiter, rotator, mun, stats) for mun in muns]
         await asyncio.gather(*tasks)
 
     print(f"\nFinalizado: {stats['updated']} actualizados, {stats['not_found']} no encontrados, {stats['failed']} fallos")
