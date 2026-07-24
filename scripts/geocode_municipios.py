@@ -13,8 +13,44 @@ from api.config import settings
 from api.models import Municipio
 from api.services.geocoder import geocode_municipio
 
-BATCH_SIZE = 50
-RATE_LIMIT = 1.1
+CONCURRENCY = 20
+MAX_RETRIES = 3
+RETRY_DELAY = 2
+PROGRESS_INTERVAL = 50
+
+
+async def geocode_one(db_factory, mun, semaphore, stats):
+    async with semaphore:
+        for attempt in range(MAX_RETRIES):
+            try:
+                geo = await geocode_municipio(mun.municipio, mun.estado)
+                if geo:
+                    async with db_factory() as db:
+                        await db.execute(
+                            update(Municipio)
+                            .where(Municipio.id == mun.id)
+                            .values(latitud=geo["lat"], longitud=geo["lng"])
+                        )
+                        await db.commit()
+                    stats["updated"] += 1
+                    print(f"  [{stats['total']}] {mun.municipio}, {mun.estado} -> {geo['lat']}, {geo['lng']}")
+                else:
+                    stats["not_found"] += 1
+                    print(f"  [{stats['total']}] {mun.municipio}, {mun.estado} -> NO ENCONTRADO")
+                stats["total"] += 1
+                if stats["total"] % PROGRESS_INTERVAL == 0:
+                    print(f"--- Progreso: {stats['updated']} ok, {stats['not_found']} no encontrados, {stats['retries']} reintentos, {stats['total']}/{stats['max']} ---")
+                return
+            except Exception as e:
+                stats["retries"] += 1
+                if attempt < MAX_RETRIES - 1:
+                    delay = RETRY_DELAY * (attempt + 1)
+                    print(f"  [{stats['total']+1}] {mun.municipio}, {mun.estado} -> ERROR ({type(e).__name__}), retry {attempt+2}/{MAX_RETRIES} en {delay}s")
+                    await asyncio.sleep(delay)
+                else:
+                    stats["failed"] += 1
+                    stats["total"] += 1
+                    print(f"  [{stats['total']}] {mun.municipio}, {mun.estado} -> FALLO DEFINITIVO ({type(e).__name__}: {str(e)[:80]})")
 
 
 async def geocode_all():
@@ -37,32 +73,15 @@ async def geocode_all():
         await engine.dispose()
         return
 
-    print(f"Municipios sin coordenadas: {total}")
-    updated = 0
-    failed = 0
+    print(f"Municipios sin coordenadas: {total} (concurrency={CONCURRENCY})")
 
-    for i, mun in enumerate(muns):
-        geo = await geocode_municipio(mun.municipio, mun.estado)
-        if geo:
-            async with session_factory() as db:
-                await db.execute(
-                    update(Municipio)
-                    .where(Municipio.id == mun.id)
-                    .values(latitud=geo["lat"], longitud=geo["lng"])
-                )
-                await db.commit()
-            updated += 1
-            print(f"[{i+1}/{total}] {mun.municipio}, {mun.estado} -> {geo['lat']}, {geo['lng']}")
-        else:
-            failed += 1
-            print(f"[{i+1}/{total}] {mun.municipio}, {mun.estado} -> NO ENCONTRADO")
+    semaphore = asyncio.Semaphore(CONCURRENCY)
+    stats = {"updated": 0, "not_found": 0, "failed": 0, "retries": 0, "total": 0, "max": total}
 
-        if (i + 1) % BATCH_SIZE == 0:
-            print(f"--- Progreso: {updated} actualizados, {failed} fallidos de {i+1} ---")
+    tasks = [geocode_one(session_factory, mun, semaphore, stats) for mun in muns]
+    await asyncio.gather(*tasks)
 
-        await asyncio.sleep(RATE_LIMIT)
-
-    print(f"\nFinalizado: {updated} actualizados, {failed} fallidos de {total}")
+    print(f"\nFinalizado: {stats['updated']} actualizados, {stats['not_found']} no encontrados, {stats['failed']} fallos, {stats['retries']} reintentos de {total}")
     await engine.dispose()
 
 
